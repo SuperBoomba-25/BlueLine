@@ -2,7 +2,12 @@ import { useState } from "react";
 import axios from "axios";
 
 function RegisterPage() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "user",
+  });
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -10,7 +15,7 @@ function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/users/register", form);
+      const res = await axios.post("/api/register", form);
       alert("נרשמת בהצלחה!");
       console.log(res.data);
     } catch (err) {

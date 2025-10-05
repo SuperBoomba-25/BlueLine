@@ -13,7 +13,7 @@ function LoginPage() {
     e.preventDefault();
     console.log("Trying to login with:", form);
     try {
-      const res = await axios.post("/api/users/login", form);
+      const res = await axios.post("/api/login", form);
       localStorage.setItem("user", JSON.stringify(res.data));
       alert("התחברת בהצלחה!");
       navigate("/");
