@@ -12,60 +12,60 @@ function Header() {
   };
 
   return (
-    <div style={styles.wrapper}>
-      <aside style={styles.sidebar}>
-        <h2 style={styles.logo}>🌊 BlueLine</h2>
-        <nav style={styles.nav}>
-          <Link to="/" style={styles.link}>
-            🏠 דף הבית
-          </Link>
-          {user ? (
-            <>
-              <Link to="/profile" style={styles.link}>
-                🙍‍♂ הפרופיל שלי
-              </Link>
-              <button onClick={logoutHandler} style={styles.button}>
-                🔓 התנתקות
-              </button>
-              <p style={styles.welcome}>שלום {user.name}</p>
-            </>
-          ) : (
-            <>
-              <Link to="/login" style={styles.link}>
-                🔐 התחברות
-              </Link>
-              <Link to="/register" style={styles.link}>
-                📝 הרשמה
-              </Link>
-            </>
-          )}
-        </nav>
-      </aside>
-    </div>
+    <aside style={styles.sidebar}>
+      <h2 style={styles.logo}>🌊 BlueLine</h2>
+      <nav style={styles.nav}>
+        <Link to="/" style={styles.link}>
+          🏠 דף הבית
+        </Link>
+        {user ? (
+          <>
+            <Link to="/profile" style={styles.link}>
+              🙍‍♂ הפרופיל שלי
+            </Link>
+            <button onClick={logoutHandler} style={styles.button}>
+              🔓 התנתקות
+            </button>
+            <p style={styles.welcome}>שלום {user.name}</p>
+          </>
+        ) : (
+          <>
+            <Link to="/login" style={styles.link}>
+              🔐 התחברות
+            </Link>
+            <Link to="/register" style={styles.link}>
+              📝 הרשמה
+            </Link>
+          </>
+        )}
+      </nav>
+    </aside>
   );
 }
 
 const styles = {
-  wrapper: {
-    display: "flex",
-    direction: "rtl",
-  },
   sidebar: {
-    width: "220px",
+    width: "240px",
     height: "100vh",
-    backgroundColor: "#f1f1f1",
-    padding: "20px",
-    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+    background: "linear-gradient(to bottom, #0077b6, #00b4d8)",
+    padding: "30px 20px",
+    boxShadow: "2px 0 10px rgba(0,0,0,0.1)",
     boxSizing: "border-box",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "flex-start",
     position: "fixed",
     right: 0,
     top: 0,
+    zIndex: 1000,
   },
   logo: {
-    marginBottom: "30px",
-    color: "#0077b6",
-    fontWeight: "bold",
-    fontSize: "1.5rem",
+    marginBottom: "40px",
+    color: "white",
+    fontWeight: "900",
+    fontSize: "1.8rem",
+    textShadow: "1px 1px 3px rgba(0,0,0,0.3)",
+    textAlign: "center",
   },
   nav: {
     display: "flex",
@@ -74,23 +74,30 @@ const styles = {
   },
   link: {
     textDecoration: "none",
-    color: "#023e8a",
+    color: "white",
     fontWeight: "bold",
     fontSize: "1rem",
+    transition: "all 0.3s ease",
+    padding: "8px 12px",
+    borderRadius: "5px",
   },
   button: {
     backgroundColor: "#ff6b6b",
-    color: "white",
+    color: "#fff",
     border: "none",
-    padding: "8px 12px",
-    borderRadius: "4px",
+    padding: "10px 16px",
+    borderRadius: "6px",
     cursor: "pointer",
     fontSize: "1rem",
+    fontWeight: "bold",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+    transition: "background-color 0.3s ease",
   },
   welcome: {
-    marginTop: "10px",
-    color: "#555",
-    fontSize: "0.9rem",
+    marginTop: "20px",
+    color: "#eee",
+    fontSize: "1rem",
+    textAlign: "center",
   },
 };
 

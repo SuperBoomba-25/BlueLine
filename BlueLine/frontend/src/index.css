@@ -38,7 +38,10 @@ a:hover {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
-
+.main-content {
+  margin-right: 240px; /* תואם לרוחב ה-sidebar */
+  padding: 20px;
+}
 /* כפתורים */
 button {
   background-color: #0077cc;

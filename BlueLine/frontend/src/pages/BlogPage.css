@@ -5,7 +5,10 @@
   font-family: "Segoe UI", sans-serif;
   background-color: #f4f9ff;
 }
-
+.main-content {
+  margin-right: 240px; /* תואם לרוחב ה-sidebar */
+  padding: 20px;
+}
 .blog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

@@ -8,7 +8,10 @@
   font-size: 2rem;
   margin-bottom: 0.5rem;
 }
-
+.main-content {
+  margin-right: 240px; /* תואם לרוחב ה-sidebar */
+  padding: 20px;
+}
 .trips-container p {
   font-size: 1rem;
   margin-bottom: 2rem;
