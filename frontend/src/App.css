@@ -1,0 +1,73 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  direction: rtl;
+}
+.page-container {
+  padding-right: 220px;
+  padding-top: 20px;
+}
+a {
+  text-decoration: none;
+  color: #0077b6;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+.app-container {
+  display: flex;
+  direction: rtl;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  margin-right: 220px; /* מפנה מקום ל־Sidebar */
+}
+header,
+aside {
+  font-family: inherit;
+}
+
+main {
+  margin-right: 240px; /* מרווח מהתפריט צדדי */
+  padding: 2rem;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 400px;
+}
+.main-content {
+  margin-right: 240px; /* תואם לרוחב ה-sidebar */
+  padding: 20px;
+}
+h1,
+h2,
+h3 {
+  color: #023e8a;
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 2rem;
+}
