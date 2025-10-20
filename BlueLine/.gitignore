@@ -1,46 +1,32 @@
-# ============================
-#  Node & React dependencies
-# ============================
+# Node & React dependencies
 /node_modules
 /.pnp
 .pnp.js
 
-# ============================
-#  Testing
-# ============================
+# Testing
 /coverage
 
-# ============================
-#  Production build
-# ============================
+# Production build
 /build
 /dist
 
-# ============================
-# ⚙ Environment files
-# ============================
+# Environment files
 .env
 .env.*
-!.env.example     # כן לשמור רק את קובץ הדוגמה
+!.env.example
 
-# ============================
-#  Logs
-# ============================
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# ============================
-#  Misc / OS
-# ============================
+# Misc / OS
 .DS_Store
 Thumbs.db
 
-# ============================
-# ☁ Terraform
-# ============================
+# Terraform
 .terraform/
 *.tfstate
 .tfstate.
@@ -49,24 +35,19 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+!terraform.lock.hcl
 
-# ============================
-#  Docker
-# ============================
+# Docker
 docker-compose.override.yml
 *.pid
 
-# ============================
-#  IDEs & Editors
-# ============================
+# IDEs & Editors
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# ============================
-#  Build system / misc tools
-# ============================
+# Build system / misc tools
 *.log
 *.cache
 .cache/
