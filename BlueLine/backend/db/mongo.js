@@ -1,17 +1,20 @@
-const { MongoClient } = require("mongodb");
+let dbConnection;
 
-const uri = "mongodb://localhost:27017";
-const client = new MongoClient(uri);
-
-let db;
-
-async function connectDB() {
-  if (!db) {
-    await client.connect();
-    db = client.db("BlueLine");
+const connectToDB = async (mongoose) => {
+  try {
+    dbConnection = await mongoose.connect(
+      "mongodb://127.0.0.1:27017/blueline",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      }
+    );
     console.log("✅ Connected to MongoDB");
+  } catch (error) {
+    console.error("❌ Error connecting to MongoDB:", error);
   }
-  return db;
-}
+};
 
-module.exports = connectDB;
+const getDB = () => dbConnection;
+
+module.exports = { connectToDB, getDB };

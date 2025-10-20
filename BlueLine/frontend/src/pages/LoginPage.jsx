@@ -1,9 +1,13 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 
 function LoginPage() {
+  const siteKey = process.env.REACT_APP_RECAPTCHA_SITE_KEY;
   const [form, setForm] = useState({ email: "", password: "" });
+  const [captchaValue, setCaptchaValue] = useState(null);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) =>
@@ -11,9 +15,14 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Trying to login with:", form);
+    setError("");
+
+    if (!captchaValue) {
+      return setError("אנא אשר שאינך רובוט לפני ההתחברות");
+    }
+
     try {
-      const res = await axios.post("/api/login", form);
+      const res = await axios.post("/api/login", { ...form, captchaValue });
       localStorage.setItem("user", JSON.stringify(res.data));
       alert("התחברת בהצלחה!");
       navigate("/");
@@ -40,6 +49,14 @@ function LoginPage() {
           onChange={handleChange}
           required
         />
+
+        <ReCAPTCHA
+          sitekey={siteKey}
+          onChange={(value) => setCaptchaValue(value)}
+        />
+
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
         <button type="submit">התחברות</button>
       </form>
     </div>

@@ -1,4 +1,8 @@
+// server.js
+
 const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -6,51 +10,72 @@ const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
-const connectDB = require("./config/db");
+const mongoose = require("mongoose");
+const { connectToDB } = require("./db/mongo"); // ✅ שינוי לפי המבנה שלך
 
-// טעינת משתני סביבה (אבטחה)
-dotenv.config();
+// 🟢 טעינת משתני סביבה
+dotenv.config({ path: "./.env" });
 
-// התחברות ל־MongoDB (סעיף 4.2.2)
-connectDB();
+// 🟢 התחברות ל-MongoDB
+connectToDB(mongoose)
+  .then(() => console.log("✅ Database connected"))
+  .catch((err) => console.error("❌ Database connection error:", err));
 
 const app = express();
-app.set("trust proxy", 1);
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*", // בפיתוח בלבד
+  },
+});
 
-app.use(express.json()); // כולל body-parser מובנה
+// 🟢 Middleware
+app.set("trust proxy", 1);
+app.use(express.json());
 app.use(cors());
 app.use(helmet());
+app.use(mongoSanitize());
+app.use(xss());
 
-app.use(mongoSanitize()); // מניעת injections
-app.use(xss()); // מניעת XSS
-
-//  הגבלת בקשות
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 דקות
-  max: 100, // מקסימום בקשות ל־IP
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: "יותר מדי בקשות מה-IP הזה, נסה שוב מאוחר יותר.",
 });
 app.use(limiter);
-
-// 📌 לוגים
 app.use(morgan("combined"));
 
-// 📌 Routes
+// 🟢 Routes קיימים
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/userRoutes");
+const surfRoutes = require("./routes/surf");
 
-// Authentication (Login/Register, סעיפים 4.3.1-4.3.2)
 app.use("/api", authRoutes);
-
-// Users CRUD (פרופילים, ניהול, סעיפים 4.3.3-4.3.4)
 app.use("/api/users", userRoutes);
+app.use("/api/surf", surfRoutes);
 
-app.use("/api/surf", require("./routes/surf"));
+// 🟢 Routes פורום
+const forumRoutes = require("./routes/forumRoutes");
+app.use("/api/forums", forumRoutes); // כל ה-Forum API יהיה כאן
 
-// בדיקה שהשרת רץ
+// 🟢 Route בסיסי
 app.get("/", (req, res) => res.send("🌊 BlueLine API is running..."));
 
+// 🟢 WebSocket Events
+io.on("connection", (socket) => {
+  console.log("🔗 משתמש התחבר");
+
+  socket.on("disconnect", () => {
+    console.log("❌ משתמש התנתק");
+  });
+
+  socket.on("newMessage", (data) => {
+    console.log("📩 הודעה חדשה:", data);
+    io.emit("newMessage", data);
+  });
+});
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
