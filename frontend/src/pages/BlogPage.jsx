@@ -1,37 +1,22 @@
+// frontend/src/pages/BlogPage.jsx
+
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
-import "./BlogPage.css"; // ✅ הקובץ משתמש ב-CSS חיצוני, אין צורך בשינוי נוסף
+// ✅ ייבוא Link כדי לאפשר ניווט מתוך הקארד
+import { Link } from "react-router-dom";
+import "./BlogPage.css";
 
 function BlogPage() {
   const [posts, setPosts] = useState([]);
 
+  // ✅ בדיקה אם המשתמש מחובר
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isLoggedIn = !!user; // יהיה true אם יש משתמש
+
   useEffect(() => {
-    // פוסטים מדומים לדוגמה
+    // ... הקוד הקיים של dummyPosts
     const dummyPosts = [
-      {
-        id: 1,
-        title: "איך לבחור את הגלשן הראשון שלך?",
-        description:
-          "המדריך השלם לבחירת גלשן למתחילים: סוגים, גובה, חומרי גלם ומה חשוב לדעת לפני הרכישה הראשונה שלך.",
-        image: "/images/blog1.jpg",
-        date: "20 באוגוסט 2025",
-      },
-      {
-        id: 2,
-        title: "5 חופים מומלצים לגלישה בישראל",
-        description:
-          "מכפר שלם ועד אשקלון – החופים הכי טובים למתחילים ומתקדמים כולל תנאים, גישה ומתי הכי כדאי לבוא.",
-        image: "/images/blog2.jpg",
-        date: "15 באוגוסט 2025",
-      },
-      {
-        id: 3,
-        title: "מה כדאי לדעת לפני טיול גלישה בחו״ל?",
-        description:
-          "בדיקת תנאי ים, ביטוחים, ציוד והשכרת גלשנים – כל הטיפים החיוניים לגלישת חו״ל בטוחה ומהנה.",
-        image: "/images/blog3.jpg",
-        date: "8 באוגוסט 2025",
-      },
+      // ... פוסטים קיימים ...
     ];
 
     setPosts(dummyPosts);
@@ -62,7 +47,19 @@ function BlogPage() {
               <h3>{post.title}</h3>
               <p className="blog-date">📅 {post.date}</p>
               <p>{post.description}</p>
-              <button className="read-more">קרא עוד</button>
+
+              {/* ✅ הוספת הקישור המותנה: */}
+              {isLoggedIn ? (
+                // קישור דינמי לנתיב שנגדיר ב-App.js
+                <Link
+                  to={`/blog/discussion/${post.id}`}
+                  className="read-more discussion-link"
+                >
+                  💬 אשכול דיון
+                </Link>
+              ) : (
+                <button className="read-more">קרא עוד</button>
+              )}
             </div>
           </div>
         ))}
