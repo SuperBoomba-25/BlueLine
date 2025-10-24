@@ -24,18 +24,15 @@ jobs:
         working-directory: frontend
         run: npm install
 
-      # ✅ צעד חדש: תיקון הרשאות ל-ESLint לפני ההרצה
-      - name: Fix ESLint permissions
-        working-directory: frontend
-        run: chmod +x node_modules/.bin/eslint
+      # ❌ צעד ה-Fix ESLint permissions הוסר - אין בו צורך כשמשתמשים ב-npm run.
 
       - name: Run frontend lint
         working-directory: frontend
-        run: npx eslint src --ext .js,.jsx
+        run: npm run lint # ✅ שימוש ב-npm run lint (מבטיח שהפקודה נמצאת בנתיב הנכון)
 
       - name: Build frontend
         working-directory: frontend
-        run: npx react-scripts build
+        run: npx react-scripts build # אפשר לשנות ל-npm run build
 
       - name: Install backend dependencies
         working-directory: backend
