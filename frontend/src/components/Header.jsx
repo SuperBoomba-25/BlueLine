@@ -1,7 +1,6 @@
-// frontend/src/components/Header.jsx (או היכן שזה ממוקם)
-
 import { Link, useNavigate } from "react-router-dom";
-// אין צורך לייבא את useState
+// ייבוא נכון של קובץ ה-CSS, בהנחה שהוא באותה תיקייה
+import "./Sidebar.css";
 
 function Header() {
   const navigate = useNavigate();
@@ -13,37 +12,30 @@ function Header() {
   };
 
   return (
-    <aside /* style={styles.sidebar} */>
-      <h2 /* style={styles.logo} */>🌊 BlueLine</h2>
-      <nav /* style={styles.nav} */>
-        <Link to="/" /* style={styles.link} */>🏠 דף הבית</Link>
-
-        {/* ✅ קישורים קבועים לכל משתמש: */}
-        <Link to="/courses" /* style={styles.link} */>📘 קורסים</Link>
-        <Link to="/blog" /* style={styles.loglink} */>📰 בלוג</Link>
-        <Link to="/trips" /* style={styles.link} */>✈️ טיולים</Link>
+    // הוספת className="sidebar" לתיקון הפריסה והחלת העיצוב
+    <aside className="sidebar">
+      <h2>BlueLine</h2>
+      <nav>
+        <Link to="/">דף הבית</Link>
+        <Link to="/courses">קורסים</Link>
+        <Link to="/blog">בלוג</Link>
+        <Link to="/trips">טיולים</Link>
 
         {user ? (
           <>
-            <Link to="/profile" /* style={styles.link} */>
-              🙍‍♂ הפרופיל שלי
-            </Link>
-            <button onClick={logoutHandler} /* style={styles.button} */>
-              🔓 התנתקות
-            </button>
-            <p /* style={styles.welcome} */>שלום {user.name}</p>
+            <Link to="/profile">הפרופיל שלי</Link>
+            <button onClick={logoutHandler}>התנתקות</button>
+            <p>שלום {user.name}</p>
           </>
         ) : (
           <>
-            <Link to="/login" /* style={styles.link} */>🔐 התחברות</Link>
-            <Link to="/register" /* style={styles.link} */>📝 הרשמה</Link>
+            <Link to="/login">התחברות</Link>
+            <Link to="/register">הרשמה</Link>
           </>
         )}
       </nav>
     </aside>
   );
 }
-
-// **הוסר אובייקט styles**
 
 export default Header;
