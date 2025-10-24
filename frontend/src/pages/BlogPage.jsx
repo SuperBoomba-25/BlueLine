@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { io } from "socket.io-client"; // ✅ ייבוא Socket.IO Client
-import "./BlogPage.css";
+import { io } from "socket.io-client";
+import "./BlogPage.css"; // ✅ הקובץ משתמש ב-CSS חיצוני, אין צורך בשינוי נוסף
 
 function BlogPage() {
   const [posts, setPosts] = useState([]);
-  const [socket, setSocket] = useState(null); // שמירה על החיבור ב־state אם צריך
 
   useEffect(() => {
     // פוסטים מדומים לדוגמה
@@ -38,21 +37,17 @@ function BlogPage() {
     setPosts(dummyPosts);
 
     // 🔗 התחברות ל־Socket.IO
-    const newSocket = io("http://localhost:5000"); // כתובת ה־backend שלך
-    setSocket(newSocket);
+    const newSocket = io("http://localhost:5000");
 
     newSocket.on("connect", () => {
       console.log("🔗 חיבור ל־Socket הצליח מהבלוג!");
     });
 
-    // אם יש אירועים נוספים מהשרת, אפשר להאזין כאן
-    // newSocket.on("newMessage", (data) => { console.log("📩 הודעה חדשה:", data); });
-
     // 🧹 Cleanup בעת סגירת הקומפוננטה
     return () => {
       newSocket.disconnect();
     };
-  }, []);
+  }, []); // ריצה פעם אחת בלבד בטעינת הקומפוננטה
 
   return (
     <div className="blog-container">
