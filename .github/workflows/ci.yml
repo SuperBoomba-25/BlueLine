@@ -24,15 +24,13 @@ jobs:
         working-directory: frontend
         run: npm install
 
-      # ❌ צעד ה-Fix ESLint permissions הוסר - אין בו צורך כשמשתמשים ב-npm run.
-
       - name: Run frontend lint
         working-directory: frontend
-        run: npm run lint # ✅ שימוש ב-npm run lint (מבטיח שהפקודה נמצאת בנתיב הנכון)
+        run: npm run lint # ✅ הפתרון הסופי ל-exit code 127
 
       - name: Build frontend
         working-directory: frontend
-        run: npx react-scripts build # אפשר לשנות ל-npm run build
+        run: npx react-scripts build
 
       - name: Install backend dependencies
         working-directory: backend
