@@ -11,7 +11,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,6 +23,11 @@ jobs:
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm install
+
+      # ✅ צעד חדש: תיקון הרשאות ל-ESLint לפני ההרצה
+      - name: Fix ESLint permissions
+        working-directory: frontend
+        run: chmod +x node_modules/.bin/eslint
 
       - name: Run frontend lint
         working-directory: frontend
