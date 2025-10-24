@@ -8,6 +8,7 @@ import BlogPage from "./pages/BlogPage";
 import TripsPage from "./pages/TripsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
+import BlogDiscussionPage from "./pages/BlogDiscussionPage";
 import "./App.css";
 
 function App() {
@@ -23,6 +24,10 @@ function App() {
             <Route path="/courses" element={<CoursesPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/trips" element={<TripsPage />} />
+            <Route
+              path="/blog/discussion/:postId"
+              element={<BlogDiscussionPage />}
+            />
             <Route
               path="/profile"
               element={

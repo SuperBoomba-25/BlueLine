@@ -1,3 +1,5 @@
+// frontend/src/components/Header.jsx (או היכן שזה ממוקם)
+
 import { Link, useNavigate } from "react-router-dom";
 // אין צורך לייבא את useState
 
@@ -11,11 +13,16 @@ function Header() {
   };
 
   return (
-    // שים לב: תצטרך להוסיף classNames במקום styles, למשל: className="sidebar"
     <aside /* style={styles.sidebar} */>
       <h2 /* style={styles.logo} */>🌊 BlueLine</h2>
       <nav /* style={styles.nav} */>
         <Link to="/" /* style={styles.link} */>🏠 דף הבית</Link>
+
+        {/* ✅ קישורים קבועים לכל משתמש: */}
+        <Link to="/courses" /* style={styles.link} */>📘 קורסים</Link>
+        <Link to="/blog" /* style={styles.loglink} */>📰 בלוג</Link>
+        <Link to="/trips" /* style={styles.link} */>✈️ טיולים</Link>
+
         {user ? (
           <>
             <Link to="/profile" /* style={styles.link} */>
