@@ -5,6 +5,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
 import CoursesPage from "./pages/CoursesPage";
 import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
 import TripsPage from "./pages/TripsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
@@ -24,6 +25,28 @@ function App() {
             <Route path="/courses" element={<CoursesPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/trips" element={<TripsPage />} />
+            <Route path="/blog/:postId" element={<BlogPostPage />} />
+            {/* ✅ נתיב חדש: עמוד יצירת אשכול - מוגן למשתמשים רשומים בלבד */}
+            <Route
+              path="/discussion/new"
+              element={
+                <ProtectedRoute>
+                  {/* דף זמני ליצירת אשכול חדש */}
+                  <div
+                    style={{
+                      padding: "20px",
+                      textAlign: "center",
+                      backgroundColor: "#f9f9f9",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <h1>דף יצירת אשכול חדש</h1>
+                    <p>כאן יופיע בהמשך טופס ליצירת נושא דיון חדש.</p>
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+
             <Route
               path="/blog/discussion/:postId"
               element={<BlogDiscussionPage />}

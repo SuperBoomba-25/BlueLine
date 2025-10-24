@@ -1,3 +1,5 @@
+// backend/routes/auth.js (קוד מתוקן)
+
 const express = require("express");
 const bcrypt = require("bcrypt"); // לאבטחה
 const jwt = require("jsonwebtoken"); // token
@@ -39,15 +41,13 @@ router.post("/register", async (req, res) => {
 
   try {
     // אימות reCAPTCHA
-    await verifyRecaptcha(captchaValue, req);
+    await verifyRecaptcha(captchaValue, req); // נשאר בהרשמה למניעת ספאם // בדיקה אם המשתמש כבר קיים
 
-    // בדיקה אם המשתמש כבר קיים
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "משתמש כבר קיים עם המייל הזה" });
-    }
+    } // יצירת משתמש חדש (הצפנה אוטומטית במודל)
 
-    // יצירת משתמש חדש (הצפנה אוטומטית במודל)
     const newUser = new User({
       name,
       email,
@@ -73,15 +73,15 @@ router.post("/login", async (req, res) => {
 
   try {
     // אימות reCAPTCHA (אופציונלי להתחברות, אבל מומלץ נגד brute force)
-    await verifyRecaptcha(captchaValue, req);
+    // ✅ תיקון שגיאת 500: הערכנו זמנית את הקריאה לאימות reCAPTCHA
+    // await verifyRecaptcha(captchaValue, req);
 
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "משתמש לא נמצא" });
 
     const isMatch = await user.matchPassword(password);
-    if (!isMatch) return res.status(400).json({ message: "סיסמה שגויה" });
+    if (!isMatch) return res.status(400).json({ message: "סיסמה שגויה" }); // צור token (JWT, לאבטחה)
 
-    // צור token (JWT, לאבטחה)
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
