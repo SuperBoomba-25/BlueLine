@@ -21,15 +21,13 @@ function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    // בדיקות לפני שליחה לשרת
     if (form.password.length < 8) {
       return setError("הסיסמה חייבת להכיל לפחות 8 תווים");
     }
 
-    // דוגמה לתנאים מחמירים יותר:
     const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
     if (!passwordRegex.test(form.password)) {
-      return setError("הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר לפחות אחד");
+      return setError("הסיסמה חייבת לכלול אות גדולה, אות קטנה ומספר אחד");
     }
 
     if (form.password !== form.confirmPassword) {
@@ -40,11 +38,17 @@ function RegisterPage() {
       return setError("אנא אשר שאינך רובוט");
     }
 
-    // אם הכול תקין – שליחה לשרת
     try {
-      const res = await axios.post("/api/register", { ...form, captchaValue }); // שינוי: הוספתי captchaValue
+      const res = await axios.post("/api/register", {
+        ...form,
+        captchaValue,
+      });
+
+      // שמירת משתמש + טוקן
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("token", res.data.token);
+
       alert("נרשמת בהצלחה!");
-      console.log(res.data);
     } catch (err) {
       alert(err.response?.data?.message || "שגיאה בהרשמה");
       console.error(err);

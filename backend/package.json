@@ -93,7 +93,7 @@
     "minipass": "^5.0.0",
     "minizlib": "^2.1.2",
     "mkdirp": "^1.0.4",
-    "mongodb": "^6.15.0",
+    "mongodb": "4.1",
     "mongodb-connection-string-url": "^3.0.2",
     "mongoose": "^8.13.3",
     "morgan": "^1.10.0",

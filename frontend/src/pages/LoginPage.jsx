@@ -23,9 +23,18 @@ function LoginPage() {
 
     try {
       const res = await axios.post("/api/login", { ...form, captchaValue });
-      localStorage.setItem("user", JSON.stringify(res.data));
+
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("role", res.data.user.role); // ← חשוב!
+
       alert("התחברת בהצלחה!");
-      navigate("/");
+
+      if (res.data.user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       alert(err.response?.data?.message || "שגיאה בהתחברות");
       console.error("Login error:", err);

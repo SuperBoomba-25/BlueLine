@@ -2,17 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
-// ✅ ייבוא Link כדי שנוכל להשתמש בקישורים
-import { Link } from "react-router-dom";
+import { Link } from "react-router-dom"; // ✅ ייבוא Link
 import "./BlogPage.css";
 
 function BlogPage() {
   const [posts, setPosts] = useState([]);
-  const [socket, setSocket] = useState(null);
+  // ❌ הוסר: const [socket, setSocket] = useState(null); // תיקון שגיאת CI
 
-  // ✅ בדיקה אם המשתמש מחובר
+  // בדיקה אם המשתמש מחובר
   const user = JSON.parse(localStorage.getItem("user"));
-  const isLoggedIn = !!user; // יהיה true אם יש משתמש
+  const isLoggedIn = !!user;
 
   useEffect(() => {
     // פוסטים מדומים לדוגמה
@@ -47,7 +46,7 @@ function BlogPage() {
 
     // 🔗 התחברות ל־Socket.IO
     const newSocket = io("http://localhost:5000");
-    setSocket(newSocket);
+    // setSocket(newSocket); // ❌ הוסר - תיקון שגיאת CI
 
     newSocket.on("connect", () => {
       console.log("🔗 חיבור ל־Socket הצליח מהבלוג!");
@@ -64,9 +63,31 @@ function BlogPage() {
       <h1>בלוג הגולשים</h1>
       <p>כאן תמצאו כתבות, טיפים, מדריכים וחוויות מהעולם המופלא של הגלישה</p>
 
+      {/* ✅ הוספת כפתור יצירת אשכול חדש - רק למשתמשים מחוברים */}
+      {isLoggedIn && (
+        <div
+          className="discussion-actions"
+          style={{ marginBottom: "20px", textAlign: "right" }}
+        >
+          <Link
+            to="/discussion/new"
+            className="create-thread-button"
+            style={{
+              backgroundColor: "#28a745",
+              color: "white",
+              padding: "10px 15px",
+              borderRadius: "5px",
+              textDecoration: "none",
+            }}
+          >
+            + יצירת אשכול דיון חדש
+          </Link>
+        </div>
+      )}
+
       <div className="blog-grid">
         {posts.map((post) => (
-          // ✅ שמירה על מבנה ה-<div> המקורי
+          // שמירה על מבנה ה-<div> המקורי
           <div className="blog-card" key={post.id}>
             <img src={post.image} alt={post.title} className="blog-image" />
             <div className="blog-content">
@@ -74,12 +95,12 @@ function BlogPage() {
               <p className="blog-date">📅 {post.date}</p>
               <p>{post.description}</p>
 
-              {/* ✅ 1. קישור "קרא עוד" רגיל (כניסה לבלוג) */}
+              {/* 1. קישור "קרא עוד" רגיל (כניסה לבלוג) */}
               <Link to={`/blog/${post.id}`} className="read-more">
                 קרא עוד
               </Link>
 
-              {/* ✅ 2. הקישור המותנה לדיון (רק למחוברים) */}
+              {/* 2. הקישור המותנה לדיון (רק למחוברים) */}
               {isLoggedIn && (
                 <Link
                   to={`/blog/discussion/${post.id}`}

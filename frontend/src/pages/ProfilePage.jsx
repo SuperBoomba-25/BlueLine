@@ -28,6 +28,9 @@ function ProfilePage() {
       <p>
         <strong>תאריך התחברות:</strong> {new Date().toLocaleString()}
       </p>
+      <p>
+        <strong>תפקיד:</strong> {user.role}
+      </p>
 
       <button onClick={handleLogout}>התנתקות</button>
     </div>

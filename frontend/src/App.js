@@ -9,6 +9,7 @@ import BlogPostPage from "./pages/BlogPostPage";
 import TripsPage from "./pages/TripsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
+import AdminPanel from "./components/AdminPanel";
 import BlogDiscussionPage from "./pages/BlogDiscussionPage";
 import "./App.css";
 
@@ -50,6 +51,14 @@ function App() {
             <Route
               path="/blog/discussion/:postId"
               element={<BlogDiscussionPage />}
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminPanel />
+                </ProtectedRoute>
+              }
             />
             <Route
               path="/profile"

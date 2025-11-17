@@ -1,9 +1,10 @@
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const User = require("../models/User");
 
 dotenv.config();
 
-const protectRoute = (req, res, next) => {
+const protectRoute = async (req, res, next) => {
   let token;
 
   if (
@@ -13,17 +14,24 @@ const protectRoute = (req, res, next) => {
     try {
       token = req.headers.authorization.split(" ")[1];
 
+      // פענוח הטוקן
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      req.user = decoded.user;
+      // טוען את כל פרטי המשתמש (בלי סיסמה)
+      req.user = await User.findById(decoded.user.id).select("-password");
+
+      if (!req.user) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
       return next();
     } catch (err) {
-      return res.status(401).json({ message: "הטוקן לא תקין" });
+      console.error(err);
+      return res.status(401).json({ message: "Token is invalid" });
     }
   }
 
-  return res.status(401).json({ message: "אין טוקן, גישה נדחתה" });
+  return res.status(401).json({ message: "No token, access denied" });
 };
 
 module.exports = protectRoute;
