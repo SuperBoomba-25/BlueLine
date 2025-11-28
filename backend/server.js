@@ -60,7 +60,7 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(morgan("combined"));
 
-// 🟢 Routes 
+// 🟢 Routes
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/userRoutes");
 const surfRoutes = require("./routes/surf");
