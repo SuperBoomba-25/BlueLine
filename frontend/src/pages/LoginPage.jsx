@@ -1,7 +1,7 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
+import api from "../api";
 
 function LoginPage() {
   const siteKey = process.env.REACT_APP_RECAPTCHA_SITE_KEY;
@@ -22,11 +22,12 @@ function LoginPage() {
     }
 
     try {
-      const res = await axios.post("/api/login", { ...form, captchaValue });
+      // 🔴 תיקון: שינוי מ-"/api/login" ל-"/login" כדי למנוע כפילות בנתיב
+      const res = await api.post("/login", { ...form, captchaValue }); // שמירת נתוני המשתמש
 
       localStorage.setItem("user", JSON.stringify(res.data.user));
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.user.role); // ← חשוב!
+      localStorage.setItem("role", res.data.user.role); // חשוב לאדמין
 
       alert("התחברת בהצלחה!");
 
