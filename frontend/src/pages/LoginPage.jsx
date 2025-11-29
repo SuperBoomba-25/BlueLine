@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ReCAPTCHA from "react-google-recaptcha";
 import api from "../api";
 
 function LoginPage() {
-  const siteKey = "6LeKzBssAAAAABX5JuU_CdiPuFZtGbBsRa8uDa3o";
-
   const [form, setForm] = useState({ email: "", password: "" });
-  const [captchaValue, setCaptchaValue] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -18,15 +14,10 @@ function LoginPage() {
     e.preventDefault();
     setError("");
 
-    if (!captchaValue) {
-      return setError("אנא אשר שאינך רובוט לפני ההתחברות");
-    }
-
     try {
       const res = await api.post("/login", {
         email: form.email,
         password: form.password,
-        captchaValue: captchaValue, // הטוקן נשלח ל-Backend
       });
 
       localStorage.setItem("user", JSON.stringify(res.data.user));
@@ -48,8 +39,9 @@ function LoginPage() {
 
   return (
     <div className="container">
-      <h2>התחברות</h2>
+            <h2>התחברות</h2>     {" "}
       <form onSubmit={handleSubmit}>
+               {" "}
         <input
           name="email"
           placeholder="אימייל"
@@ -57,6 +49,7 @@ function LoginPage() {
           required
           autoComplete="username"
         />
+               {" "}
         <input
           name="password"
           placeholder="סיסמה"
@@ -65,14 +58,10 @@ function LoginPage() {
           required
           autoComplete="current-password"
         />
-        {/* רכיב ReCAPTCHA משתמש ב-siteKey החדש */}
-        <ReCAPTCHA
-          sitekey={siteKey}
-          onChange={(value) => setCaptchaValue(value)}
-        />
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">התחברות</button>
+                {error && <p style={{ color: "red" }}>{error}</p>}       {" "}
+        <button type="submit">התחברות</button>     {" "}
       </form>
+         {" "}
     </div>
   );
 }
