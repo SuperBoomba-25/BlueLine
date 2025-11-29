@@ -1,11 +1,10 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
-const User = require("../models/User");
+const User = require("../models/User"); // ודא שיש require ל-User Model
 
 const router = express.Router();
 
-// 💡 פונקציה לאימות reCAPTCHA (משוחזרת)
 const verifyRecaptcha = async (captchaValue, req) => {
   if (!captchaValue) {
     // אם אין ערך, זרוק שגיאה שתוביל לקוד 400
@@ -17,8 +16,9 @@ const verifyRecaptcha = async (captchaValue, req) => {
       "https://www.google.com/recaptcha/api/siteverify",
       null,
       {
-        timeout: 5000, // 🛠️ תיקון: הוספת Timeout לטיפול בשגיאות פסק זמן
+        timeout: 5000, // 💡 טיפול ב-Timeout של הרשת
         params: {
+          // המפתח הסודי נשלף ממשתני הסביבה ב-Render
           secret: process.env.RECAPTCHA_SECRET_KEY,
           response: captchaValue,
           remoteip: req.ip,
@@ -45,8 +45,7 @@ router.post("/register", async (req, res) => {
   const { name, email, password, role, captchaValue } = req.body;
 
   try {
-    // 🟢 הפונקציה המלאה רצה עכשיו!
-    await verifyRecaptcha(captchaValue, req);
+    await verifyRecaptcha(captchaValue, req); // הפעלת בדיקת reCAPTCHA
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -80,8 +79,7 @@ router.post("/login", async (req, res) => {
   const { email, password, captchaValue } = req.body;
 
   try {
-    // 🟢 הפונקציה המלאה רצה עכשיו!
-    await verifyRecaptcha(captchaValue, req);
+    await verifyRecaptcha(captchaValue, req); // הפעלת בדיקת reCAPTCHA
 
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "משתמש לא נמצא" });
