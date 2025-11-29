@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ReCAPTCHA from "react-google-recaptcha"; // 🟢 שחזור הייבוא
+import ReCAPTCHA from "react-google-recaptcha";
 import api from "../api";
 
 function LoginPage() {
-  // 💡 שימוש ישיר במפתח הציבורי שאושר
-  const siteKey = "6LdXuRssAAAAAE5XgZPx2FoW2Y9tKi_i6agWFSpl";
+  const siteKey = "6LeKzBssAAAAABX5JuU_CdiPuFZtGbBsRa8uDa3o";
+
   const [form, setForm] = useState({ email: "", password: "" });
-  const [captchaValue, setCaptchaValue] = useState(null); // שחזור המשתנה
+  const [captchaValue, setCaptchaValue] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -16,13 +16,13 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // בדיקה שהמשתמש סימן (או שהטוקן נוצר)
+    setError("");
+
     if (!captchaValue) {
       return setError("אנא אשר שאינך רובוט לפני ההתחברות");
     }
 
     try {
-      // שולח את הטוקן לשרת
       const res = await api.post("/login", {
         email: form.email,
         password: form.password,
@@ -48,34 +48,31 @@ function LoginPage() {
 
   return (
     <div className="container">
-            <h2>התחברות</h2>     {" "}
+      <h2>התחברות</h2>
       <form onSubmit={handleSubmit}>
-               {" "}
         <input
           name="email"
           placeholder="אימייל"
           onChange={handleChange}
           required
-          autocomplete="username" // 💡 תיקון אזהרת הדפדפן
+          autoComplete="username"
         />
-               {" "}
         <input
           name="password"
           placeholder="סיסמה"
           type="password"
           onChange={handleChange}
           required
-          autocomplete="current-password" // 💡 תיקון אזהרת הדפדפן
+          autoComplete="current-password"
         />
-                {/* 🟢 שחזור: קומפוננטת ReCAPTCHA */}       {" "}
+        {/* רכיב ReCAPTCHA משתמש ב-siteKey החדש */}
         <ReCAPTCHA
           sitekey={siteKey}
           onChange={(value) => setCaptchaValue(value)}
         />
-                {error && <p style={{ color: "red" }}>{error}</p>}       {" "}
-        <button type="submit">התחברות</button>     {" "}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        <button type="submit">התחברות</button>
       </form>
-         {" "}
     </div>
   );
 }
