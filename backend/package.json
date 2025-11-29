@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "abbrev": "^1.1.1",
     "accepts": "^2.0.0",
