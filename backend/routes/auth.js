@@ -1,5 +1,3 @@
-// backend/routes/auth.js (קוד מתוקן)
-
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
@@ -7,7 +5,7 @@ const User = require("../models/User");
 
 const router = express.Router();
 
-// 💡 פונקציה לאימות reCAPTCHA
+// 💡 פונקציה לאימות reCAPTCHA (משוחזרת)
 const verifyRecaptcha = async (captchaValue, req) => {
   if (!captchaValue) {
     // אם אין ערך, זרוק שגיאה שתוביל לקוד 400
@@ -19,8 +17,8 @@ const verifyRecaptcha = async (captchaValue, req) => {
       "https://www.google.com/recaptcha/api/siteverify",
       null,
       {
+        timeout: 5000, // 🛠️ תיקון: הוספת Timeout לטיפול בשגיאות פסק זמן
         params: {
-          // ❗ ודא שמשתנה הסביבה הזה מוגדר ב-Render!
           secret: process.env.RECAPTCHA_SECRET_KEY,
           response: captchaValue,
           remoteip: req.ip,
@@ -29,7 +27,7 @@ const verifyRecaptcha = async (captchaValue, req) => {
     );
 
     if (!response.data.success) {
-      // אם גוגל מחזירה כשלון
+      console.log("Google Error Codes:", response.data["error-codes"]);
       throw new Error(
         `reCAPTCHA failed: ${
           response.data["error-codes"]?.join(", ") || "unknown"
@@ -37,7 +35,6 @@ const verifyRecaptcha = async (captchaValue, req) => {
       );
     }
   } catch (err) {
-    // טיפול בשגיאות רשת או שגיאות אחרות בתוך הפונקציה
     console.error("ReCAPTCHA Verification Error:", err.message);
     throw new Error("שגיאה קריטית באימות reCAPTCHA. אנא נסה שוב.");
   }
@@ -48,13 +45,13 @@ router.post("/register", async (req, res) => {
   const { name, email, password, role, captchaValue } = req.body;
 
   try {
-    // אימות reCAPTCHA
-    await verifyRecaptcha(captchaValue, req); // בדיקה אם המשתמש כבר קיים
+    // 🟢 הפונקציה המלאה רצה עכשיו!
+    await verifyRecaptcha(captchaValue, req);
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "משתמש כבר קיים עם המייל הזה" });
-    } // יצירת משתמש חדש
+    }
 
     const newUser = new User({
       name,
@@ -71,7 +68,6 @@ router.post("/register", async (req, res) => {
     });
   } catch (err) {
     console.error("REGISTER ERROR:", err.message);
-    // אם זו שגיאה שמקורה ב-reCAPTCHA או שגיאת לקוח אחרת
     if (err.message.includes("רובוט") || err.message.includes("reCAPTCHA")) {
       return res.status(400).json({ message: err.message });
     }
@@ -84,14 +80,14 @@ router.post("/login", async (req, res) => {
   const { email, password, captchaValue } = req.body;
 
   try {
-    // אימות reCAPTCHA
+    // 🟢 הפונקציה המלאה רצה עכשיו!
     await verifyRecaptcha(captchaValue, req);
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "משתמש לא נמצא" }); // הפונקציה matchPassword נמצאת במודל User, משווה סיסמאות
+    if (!user) return res.status(400).json({ message: "משתמש לא נמצא" });
 
     const isMatch = await user.matchPassword(password);
-    if (!isMatch) return res.status(400).json({ message: "סיסמה שגויה" }); // יצירת token
+    if (!isMatch) return res.status(400).json({ message: "סיסמה שגויה" });
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -106,7 +102,6 @@ router.post("/login", async (req, res) => {
     });
   } catch (err) {
     console.error("LOGIN ERROR:", err.message);
-    // אם זו שגיאה שמקורה ב-reCAPTCHA או שגיאת לקוח אחרת
     if (err.message.includes("רובוט") || err.message.includes("reCAPTCHA")) {
       return res.status(400).json({ message: err.message });
     }
