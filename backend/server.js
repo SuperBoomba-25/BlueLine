@@ -8,90 +8,73 @@ const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
-const mongoose = require("mongoose");
-const { connectToDB } = require("./db/mongo");
+
+// ✅ בחר באחת מהאפשרויות לחיבור
+// 1. שימוש ב-config/db.js
+const connectDB = require("./config/db");
+
+// 2. או שימוש ב-db/mongo.js
+// const { connectToDB } = require("./db/mongo");
+
 const courseRoutes = require("./routes/courseRoutes");
 const tripRoutes = require("./routes/tripRoutes");
+const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/userRoutes");
+const surfRoutes = require("./routes/surf");
+const forumRoutes = require("./routes/forumRoutes");
 
-// 🟢 טעינת משתני סביבה
+// 🟢 Load environment variables
 dotenv.config({ path: "./.env" });
 
-// 🟢 התחברות ל-MongoDB
-connectToDB(mongoose)
-  .then(() => console.log("✅ Database connected"))
-  .catch((err) => console.error("❌ Database connection error:", err));
+// 🟢 Connect to MongoDB
+connectDB(); // או connectToDB();
 
 const app = express();
 const server = http.createServer(app);
 
-// 💡 הגדרת CORS מפושטת: יצירת אובייקט CORS Options
+// 💡 CORS
 const allowedOrigins = [
-  "http://localhost:3000", // כתובת הפיתוח המקומית
-  "https://blueline-yyzo.onrender.com", // ✅ הכתובת המפרוסת של ה-Frontend
+  "http://localhost:3000",
+  "https://blueline-yyzo.onrender.com",
 ];
 
 const corsOptions = {
-  origin: allowedOrigins, // מאפשר גישה רק מהכתובות המאושרות
+  origin: allowedOrigins,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true, // חיוני לשליחת cookies
+  credentials: true,
 };
 
-const io = new Server(server, {
-  cors: corsOptions, // השתמש בהגדרות המפורשות עבור Socket.io
-});
+const io = new Server(server, { cors: corsOptions });
 
 // 🟢 Middleware
 app.set("trust proxy", 1);
 app.use(express.json());
-
-// 💡 שימוש בהגדרת CORS המפושטת לאפליקציית אקספרס
 app.use(cors(corsOptions));
-
 app.use(helmet());
 app.use(mongoSanitize());
 app.use(xss());
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: "יותר מדי בקשות מה-IP הזה, נסה שוב מאוחר יותר.",
-});
-app.use(limiter);
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(morgan("combined"));
 
 // 🟢 Routes
-const authRoutes = require("./routes/auth");
-const userRoutes = require("./routes/userRoutes");
-const surfRoutes = require("./routes/surf");
-
 app.use("/api/trips", tripRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/surf", surfRoutes);
-
-// 🟢 Routes פורום
-const forumRoutes = require("./routes/forumRoutes");
 app.use("/api/forums", forumRoutes);
 
-// 🟢 Route בסיסי
+// 🟢 Base route
 app.get("/", (req, res) => res.send("🌊 BlueLine API is running..."));
 
-// 🟢 WebSocket Events
+// 🟢 WebSocket
 io.on("connection", (socket) => {
   console.log("🔗 משתמש התחבר");
-
-  socket.on("disconnect", () => {
-    console.log("❌ משתמש התנתק");
-  });
-
-  socket.on("newMessage", (data) => {
-    console.log("📩 הודעה חדשה:", data);
-    io.emit("newMessage", data);
-  });
+  socket.on("disconnect", () => console.log("❌ משתמש התנתק"));
+  socket.on("newMessage", (data) => io.emit("newMessage", data));
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+server.listen(PORT, () =>
+  console.log(`🚀 Server running on http://localhost:${PORT}`)
+);
