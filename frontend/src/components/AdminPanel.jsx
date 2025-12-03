@@ -10,7 +10,7 @@ const AdminPanel = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token"); // ⚠️ תיקון 1: שימוש בגרש אחורי (`) עבור ה-Headers, והוספת API_URL
+      const token = localStorage.getItem("token");
 
       const { data } = await axios.get(`${API_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -26,8 +26,7 @@ const AdminPanel = () => {
 
   const toggleBan = async (id) => {
     try {
-      const token = localStorage.getItem("token"); // ⚠️ תיקון 2: שימוש בגרש אחורי (`) עבור ה-URL וה-Headers, והוספת API_URL
-
+      const token = localStorage.getItem("token");
       await axios.put(
         `${API_URL}/api/users/${id}/ban`,
         {},
@@ -42,8 +41,7 @@ const AdminPanel = () => {
 
   const makeAdmin = async (id) => {
     try {
-      const token = localStorage.getItem("token"); // ⚠️ תיקון 3: שימוש בגרש אחורי (`) עבור ה-URL וה-Headers, והוספת API_URL
-
+      const token = localStorage.getItem("token");
       await axios.put(
         `${API_URL}/api/users/${id}/make-admin`,
         {},
@@ -64,58 +62,51 @@ const AdminPanel = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-            <h1>Admin Panel</h1>     {" "}
+      <h1>Admin Panel</h1>
+
       <table
         border="1"
         cellPadding="8"
         style={{ width: "100%", textAlign: "left" }}
       >
-               {" "}
         <thead>
-                   {" "}
           <tr>
-                        <th>Name</th>            <th>Email</th>           {" "}
-            <th>Role</th>            <th>Banned</th>            <th>Actions</th>
-                     {" "}
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Banned</th>
+            <th>Actions</th>
           </tr>
-                 {" "}
         </thead>
-               {" "}
+
         <tbody>
-                   {" "}
           {users.length === 0 && (
             <tr>
-                            <td colSpan="5">No users found.</td>           {" "}
+              <td colSpan="5">No users found.</td>
             </tr>
           )}
-                   {" "}
+
           {users.map((user) => (
             <tr key={user._id}>
-                            <td>{user.name}</td>             {" "}
-              <td>{user.email}</td>              <td>{user.role}</td>           
-                <td>{user.isBanned ? "Yes" : "No"}</td>             {" "}
+              <td>{user.name}</td>
+              <td>{user.email}</td>
+              <td>{user.role}</td>
+              <td>{user.isBanned ? "Yes" : "No"}</td>
               <td>
-                               {" "}
                 <button onClick={() => toggleBan(user._id)}>
-                                    {user.isBanned ? "Unban" : "Ban"}           
-                     {" "}
+                  {user.isBanned ? "Unban" : "Ban"}
                 </button>
-                               {" "}
+
                 {user.role !== "admin" && (
                   <button onClick={() => makeAdmin(user._id)}>
-                                        Make Admin                  {" "}
+                    Make Admin
                   </button>
                 )}
-                             {" "}
               </td>
-                         {" "}
             </tr>
           ))}
-                 {" "}
         </tbody>
-             {" "}
       </table>
-         {" "}
     </div>
   );
 };

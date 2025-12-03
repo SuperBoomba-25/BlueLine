@@ -1,4 +1,3 @@
-// backend/routes/auth.js
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
@@ -6,41 +5,11 @@ const User = require("../models/User");
 
 const router = express.Router();
 
-// פונקציה לאימות reCAPTCHA (אם תרצה להפעיל שוב)
-const verifyRecaptcha = async (captchaValue, req) => {
-  try {
-    const response = await axios.post(
-      "https://www.google.com/recaptcha/api/siteverify",
-      null,
-      {
-        params: {
-          secret: process.env.RECAPTCHA_SECRET_KEY,
-          response: captchaValue,
-          remoteip: req.ip,
-        },
-      }
-    );
-
-    if (!response.data.success) {
-      throw new Error(
-        `reCAPTCHA failed: ${
-          response.data["error-codes"]?.join(", ") || "unknown"
-        }`
-      );
-    }
-  } catch (err) {
-    throw new Error("שגיאה באימות reCAPTCHA: " + err.message);
-  }
-};
-
 // ******** REGISTER ********
 router.post("/register", async (req, res) => {
-  const { name, email, password, role, captchaValue } = req.body;
+  const { name, email, password, role } = req.body;
 
   try {
-    // אם תרצה reCAPTCHA גם בהרשמה – בטל הערה:
-    // await verifyRecaptcha(captchaValue, req);
-
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "משתמש כבר קיים עם המייל הזה" });
@@ -72,12 +41,9 @@ router.post("/register", async (req, res) => {
 
 // ******** LOGIN ********
 router.post("/login", async (req, res) => {
-  const { email, password, captchaValue } = req.body;
+  const { email, password } = req.body;
 
   try {
-    // אם תרצה reCAPTCHA גם בלוגין – בטל הערה:
-    // await verifyRecaptcha(captchaValue, req);
-
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "משתמש לא נמצא" });
