@@ -55,8 +55,6 @@ app.use(mongoSanitize());
 app.use(xss());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(morgan("combined"));
-// 🟢 AdminRoutes
-app.use("/api/users", require("./routes/users"));
 // 🟢 Routes
 app.use("/api/trips", tripRoutes);
 app.use("/api/courses", courseRoutes);
