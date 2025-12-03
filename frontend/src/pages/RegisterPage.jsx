@@ -1,16 +1,19 @@
+// frontend/src/pages/RegisterPage.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import api from "../api";
+import api from "../api"; // axios instance עם baseURL ל-API
 
 function RegisterPage() {
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     role: "user",
   });
+
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
@@ -18,24 +21,149 @@ function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // 🗑️ וודא שאין בדיקה על captchaValue
+    setError("");
+
+    // בדיקות בסיסיות בצד לקוח
+    if (!form.name || !form.email || !form.password) {
+      setError("אנא מלא את כל השדות");
+      return;
+    }
+
+    if (form.password.length < 8) {
+      setError("הסיסמה חייבת להיות לפחות 8 תווים");
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setError("הסיסמאות אינן תואמות");
+      return;
+    }
 
     try {
+      setLoading(true);
+
+      // שולחים ל-API שלנו (authRoutes: POST /api/register)
       const res = await api.post("/register", {
         name: form.name,
         email: form.email,
         password: form.password,
-        role: form.role, // 🗑️ וודא ש-captchaValue לא נשלח
-      }); // ... לוגיקת הצלחה ...
+        role: form.role,
+      });
+
+      console.log("Register response:", res.data);
+
+      alert("נרשמת בהצלחה! עכשיו תוכל להתחבר.");
+
+      // אחרי הרשמה – נשלח למסך התחברות
+      navigate("/login");
     } catch (err) {
-      // ... טיפול בשגיאות ...
+      console.error("Register error:", err.response?.data || err);
+
+      const msg =
+        err.response?.data?.message || "שגיאה בהרשמה. בדוק את הפרטים ונסה שוב.";
+
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    // 🗑️ וודא שרכיב ReCAPTCHA לא קיים ב-JSX
-    <div className="container">
-            <h2>הרשמה</h2>      {/* ... הטופס ... */}   {" "}
+    <div
+      className="auth-container"
+      style={{ maxWidth: "400px", margin: "0 auto", padding: "20px" }}
+    >
+      <h2 style={{ textAlign: "center", marginBottom: "20px" }}>הרשמה</h2>
+
+      <form onSubmit={handleSubmit}>
+        <div className="form-group" style={{ marginBottom: "12px" }}>
+          <label>שם מלא</label>
+          <input
+            type="text"
+            name="name"
+            placeholder="שם מלא"
+            value={form.name}
+            onChange={handleChange}
+            required
+            style={{ width: "100%", padding: "8px" }}
+          />
+        </div>
+
+        <div className="form-group" style={{ marginBottom: "12px" }}>
+          <label>אימייל</label>
+          <input
+            type="email"
+            name="email"
+            placeholder="example@mail.com"
+            value={form.email}
+            onChange={handleChange}
+            required
+            style={{ width: "100%", padding: "8px" }}
+          />
+        </div>
+
+        <div className="form-group" style={{ marginBottom: "12px" }}>
+          <label>סיסמה (לפחות 8 תווים)</label>
+          <input
+            type="password"
+            name="password"
+            placeholder="סיסמה"
+            value={form.password}
+            onChange={handleChange}
+            required
+            style={{ width: "100%", padding: "8px" }}
+            autoComplete="new-password"
+          />
+        </div>
+
+        <div className="form-group" style={{ marginBottom: "12px" }}>
+          <label>אימות סיסמה</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="אימות סיסמה"
+            value={form.confirmPassword}
+            onChange={handleChange}
+            required
+            style={{ width: "100%", padding: "8px" }}
+            autoComplete="new-password"
+          />
+        </div>
+
+        {/* אם תרצה בעתיד לבחור תפקיד */}
+        {/* 
+        <div className="form-group" style={{ marginBottom: "12px" }}>
+          <label>תפקיד</label>
+          <select
+            name="role"
+            value={form.role}
+            onChange={handleChange}
+            style={{ width: "100%", padding: "8px" }}
+          >
+            <option value="user">משתמש רגיל</option>
+            <option value="admin">מנהל (admin)</option>
+          </select>
+        </div>
+        */}
+
+        {error && <p style={{ color: "red", marginBottom: "10px" }}>{error}</p>}
+
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "10px",
+            backgroundColor: "#007bff",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          {loading ? "נרשם..." : "הרשמה"}
+        </button>
+      </form>
     </div>
   );
 }
