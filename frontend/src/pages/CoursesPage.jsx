@@ -22,7 +22,7 @@ function CoursesPage() {
 
   const enrollCourse = async (courseId) => {
     try {
-      const res = await api.post(/courses/${courseId}/enroll);
+      const res = await api.post(`/courses/${courseId}/enroll`);
       setMessage(res.data.message);
 
       // עדכון מקומי של משתתפים
@@ -44,9 +44,9 @@ function CoursesPage() {
     <div className="courses-container">
       <h1>🎓 קורסי גלישה</h1>
       <p className="intro">
-        כאן תוכלו למצוא קורסי גלישה לכל הרמות – ממתחילים שעולים על הגלשן
-        בפעם הראשונה, ועד גולשים מתקדמים שרוצים לשפר טכניקה, קריאת ים וביצועים
-        על הגל.
+        כאן תוכלו למצוא קורסי גלישה לכל הרמות – ממתחילים שעולים על הגלשן בפעם
+        הראשונה, ועד גולשים מתקדמים שרוצים לשפר טכניקה, קריאת ים וביצועים על
+        הגל.
       </p>
 
       {message && <p className="info-box">{message}</p>}
@@ -103,9 +103,7 @@ function CoursesPage() {
 
                 <p className="course-spots">
                   🧍‍♂ מקומות פנויים:{" "}
-                  <strong
-                    style={{ color: spotsLeft === 0 ? "red" : "green" }}
-                  >
+                  <strong style={{ color: spotsLeft === 0 ? "red" : "green" }}>
                     {spotsLeft === 0 ? "מלא" : spotsLeft}
                   </strong>
                 </p>
@@ -126,4 +124,4 @@ function CoursesPage() {
   );
 }
 
-export default CoursesPage;
+export default CoursesPage;

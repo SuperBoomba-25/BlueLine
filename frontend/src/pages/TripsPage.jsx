@@ -22,7 +22,7 @@ function TripsPage() {
 
   const registerToTrip = async (tripId) => {
     try {
-      const res = await api.post(/trips/${tripId}/register);
+      const res = await api.post(`/trips/${tripId}/register`);
       setMessage(res.data.message);
 
       // עדכון מקומי של משתתפים
@@ -57,11 +57,7 @@ function TripsPage() {
           return (
             <div key={trip._id} className="trip-card">
               {trip.image && (
-                <img
-                  src={trip.image}
-                  alt={trip.title}
-                  className="trip-image"
-                />
+                <img src={trip.image} alt={trip.title} className="trip-image" />
               )}
 
               <div className="trip-info">
@@ -80,9 +76,7 @@ function TripsPage() {
 
                 <p>
                   🧍‍♂ מקומות פנויים:{" "}
-                  <strong
-                    style={{ color: spotsLeft === 0 ? "red" : "green" }}
-                  >
+                  <strong style={{ color: spotsLeft === 0 ? "red" : "green" }}>
                     {spotsLeft === 0 ? "מלא" : spotsLeft}
                   </strong>
                 </p>
