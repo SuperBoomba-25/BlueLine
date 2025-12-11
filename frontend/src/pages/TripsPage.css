@@ -2,37 +2,58 @@
   padding: 2rem;
   background-color: #f5faff;
   color: #333;
+  direction: rtl;
+  text-align: right;
 }
 
 .trips-container h1 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
 }
-.main-content {
-  margin-right: 240px; /* תואם לרוחב ה-sidebar */
-  padding: 20px;
-}
-.trips-container p {
+
+.trips-intro {
   font-size: 1rem;
   margin-bottom: 2rem;
+  color: #444;
+  max-width: 800px;
 }
 
+/* הודעת מערכת */
+.info-box {
+  background-color: #e1f5fe;
+  border-right: 5px solid #0288d1;
+  padding: 10px 15px;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+/* טקסט לטעינה */
+.loading-text {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 1.1rem;
+}
+
+/* סידור הגריד */
 .trips-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
 }
 
+/* כרטיס טיול */
 .trip-card {
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .trip-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
 .trip-image {
@@ -42,23 +63,39 @@
 }
 
 .trip-info {
-  padding: 1rem;
+  padding: 1rem 1.2rem 1.3rem;
 }
 
 .trip-info h3 {
-  margin: 0.5rem 0;
+  margin: 0.4rem 0 0.6rem;
+  font-size: 1.3rem;
 }
 
+/* כפתור הרשמה */
 .register-btn {
   background-color: #0077cc;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.2rem;
   margin-top: 1rem;
   border-radius: 6px;
   cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .register-btn:hover {
   background-color: #005fa3;
+  transform: translateY(-1px);
+}
+
+.register-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* שמירה על התאמה לפריסת האפליקציה הכללית */
+.main-content {
+  margin-right: 240px; /* אם יש sidebar מימין */
+  padding: 20px;
 }

@@ -22,9 +22,10 @@ function CoursesPage() {
 
   const enrollCourse = async (courseId) => {
     try {
-      const res = await api.post(`/courses/${courseId}/enroll`);
+      const res = await api.post(/courses/${courseId}/enroll);
       setMessage(res.data.message);
 
+      // עדכון מקומי של משתתפים
       setCourses((prev) =>
         prev.map((c) =>
           c._id === courseId
@@ -37,11 +38,17 @@ function CoursesPage() {
     }
   };
 
-  if (loading) return <p>טוען קורסים...</p>;
+  if (loading) return <p className="loading-text">טוען קורסים...</p>;
 
   return (
     <div className="courses-container">
-      <h2>🎓 קורסים לגלישה</h2>
+      <h1>🎓 קורסי גלישה</h1>
+      <p className="intro">
+        כאן תוכלו למצוא קורסי גלישה לכל הרמות – ממתחילים שעולים על הגלשן
+        בפעם הראשונה, ועד גולשים מתקדמים שרוצים לשפר טכניקה, קריאת ים וביצועים
+        על הגל.
+      </p>
+
       {message && <p className="info-box">{message}</p>}
 
       <div className="courses-grid">
@@ -50,54 +57,67 @@ function CoursesPage() {
 
           return (
             <div key={course._id} className="course-card">
-              <img
-                src={course.image}
-                alt={course.name}
-                className="course-image"
-              />
+              {course.image && (
+                <img
+                  src={course.image}
+                  alt={course.name}
+                  className="course-image"
+                />
+              )}
 
-              <h3>{course.name}</h3>
-              <p>
-                <strong>רמה:</strong> {course.level}
-              </p>
+              <div className="course-info">
+                <h3>{course.name}</h3>
 
-              <p>
-                <strong>מחיר:</strong> {course.price} ₪
-              </p>
+                <p className="course-level">
+                  🏄‍♂ <strong>רמה:</strong> {course.level}
+                </p>
 
-              <p>
-                <strong>משך:</strong> {course.duration}
-              </p>
+                <p className="course-price">
+                  💸 <strong>מחיר:</strong> {course.price} ₪
+                </p>
 
-              <p>{course.description}</p>
+                <p className="course-duration">
+                  ⏱ <strong>משך הקורס:</strong> {course.duration}
+                </p>
 
-              <p>
-                🎒 <strong>מה כלול:</strong>
-              </p>
-              <ul>
-                {course.includes.map((item, idx) => (
-                  <li key={idx}>✔ {item}</li>
-                ))}
-              </ul>
+                {course.description && (
+                  <p className="course-description">{course.description}</p>
+                )}
 
-              <p>
-                👤 <strong>גילאים:</strong> {course.minAge}–{course.maxAge}
-              </p>
+                {/* כותרת "מה כלול" לפני התוכן */}
+                {course.includes && course.includes.length > 0 && (
+                  <>
+                    <h4 className="includes-title">🎒 מה כלול בקורס?</h4>
+                    <ul className="includes-list">
+                      {course.includes.map((item, idx) => (
+                        <li key={idx}>✔ {item}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
 
-              <p>
-                🧍‍♂️ מקומות פנויים:{" "}
-                <strong style={{ color: spotsLeft === 0 ? "red" : "green" }}>
-                  {spotsLeft === 0 ? "מלא" : spotsLeft}
-                </strong>
-              </p>
+                <p className="course-ages">
+                  👤 <strong>גילאים מתאימים:</strong> {course.minAge}–
+                  {course.maxAge}
+                </p>
 
-              <button
-                className="enroll-btn"
-                disabled={spotsLeft === 0}
-                onClick={() => enrollCourse(course._id)}
-              >
-                {spotsLeft === 0 ? "מלא" : "להרשמה"}
-              </button>
+                <p className="course-spots">
+                  🧍‍♂ מקומות פנויים:{" "}
+                  <strong
+                    style={{ color: spotsLeft === 0 ? "red" : "green" }}
+                  >
+                    {spotsLeft === 0 ? "מלא" : spotsLeft}
+                  </strong>
+                </p>
+
+                <button
+                  className="enroll-btn"
+                  disabled={spotsLeft === 0}
+                  onClick={() => enrollCourse(course._id)}
+                >
+                  {spotsLeft === 0 ? "הקורס מלא" : "להרשמה לקורס"}
+                </button>
+              </div>
             </div>
           );
         })}
@@ -106,4 +126,4 @@ function CoursesPage() {
   );
 }
 
-export default CoursesPage;
+export default CoursesPage;

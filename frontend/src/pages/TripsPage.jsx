@@ -22,10 +22,10 @@ function TripsPage() {
 
   const registerToTrip = async (tripId) => {
     try {
-      const res = await api.post(`/trips/${tripId}/register`);
+      const res = await api.post(/trips/${tripId}/register);
       setMessage(res.data.message);
 
-      // עדכון מקומי של מקומות
+      // עדכון מקומי של משתתפים
       setTrips((prev) =>
         prev.map((t) =>
           t._id === tripId
@@ -38,11 +38,16 @@ function TripsPage() {
     }
   };
 
-  if (loading) return <p>טוען טיולים...</p>;
+  if (loading) return <p className="loading-text">טוען טיולים...</p>;
 
   return (
     <div className="trips-container">
       <h1>🌴 טיולי גלישה</h1>
+      <p className="trips-intro">
+        חוויית גלישה מושלמת מחוץ לשגרה – טיולי גלישה מאורגנים עם מדריכים
+        מקצועיים, חופים נבחרים ולינה נוחה ליד הים.
+      </p>
+
       {message && <p className="info-box">{message}</p>}
 
       <div className="trips-grid">
@@ -51,10 +56,17 @@ function TripsPage() {
 
           return (
             <div key={trip._id} className="trip-card">
-              <img src={trip.image} alt={trip.title} className="trip-image" />
+              {trip.image && (
+                <img
+                  src={trip.image}
+                  alt={trip.title}
+                  className="trip-image"
+                />
+              )}
 
               <div className="trip-info">
                 <h3>{trip.title}</h3>
+
                 <p>📍 {trip.location}</p>
 
                 <p>
@@ -63,11 +75,14 @@ function TripsPage() {
                 </p>
 
                 <p>💸 {trip.price} ₪</p>
-                <p>{trip.description}</p>
+
+                {trip.description && <p>{trip.description}</p>}
 
                 <p>
-                  🧍‍♂️ מקומות פנויים:{" "}
-                  <strong style={{ color: spotsLeft === 0 ? "red" : "green" }}>
+                  🧍‍♂ מקומות פנויים:{" "}
+                  <strong
+                    style={{ color: spotsLeft === 0 ? "red" : "green" }}
+                  >
                     {spotsLeft === 0 ? "מלא" : spotsLeft}
                   </strong>
                 </p>
@@ -77,7 +92,7 @@ function TripsPage() {
                   disabled={spotsLeft === 0}
                   onClick={() => registerToTrip(trip._id)}
                 >
-                  {spotsLeft === 0 ? "הטיול מלא" : "להרשמה"}
+                  {spotsLeft === 0 ? "הטיול מלא" : "להרשמה לטיול"}
                 </button>
               </div>
             </div>
