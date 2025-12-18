@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
 import AdminPanel from "./components/AdminPanel";
 import BlogDiscussionPage from "./pages/BlogDiscussionPage";
+import CreateThreadPage from "./pages/CreateThreadPage";
 import "./App.css";
 
 function App() {
@@ -27,6 +28,8 @@ function App() {
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/trips" element={<TripsPage />} />
             <Route path="/blog/:postId" element={<BlogPostPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/discussion/new" element={<CreateThreadPage />} />
             {/* ✅ נתיב חדש: עמוד יצירת אשכול - מוגן למשתמשים רשומים בלבד */}
             <Route
               path="/discussion/new"

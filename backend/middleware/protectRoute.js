@@ -1,35 +1,32 @@
+// backend/middleware/protectRoute.js
 const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
 const User = require("../models/User");
 
-dotenv.config();
+const protect = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization || "";
 
-const protectRoute = async (req, res, next) => {
-  let token;
-
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    try {
-      token = req.headers.authorization.split(" ")[1];
-
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      req.user = await User.findById(decoded.id).select("-password");
-
-      if (!req.user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      return next();
-    } catch (err) {
-      console.error(err);
-      return res.status(401).json({ message: "Token is invalid" });
+    // חייב להגיע: "Bearer <token>"
+    if (!authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Not authorized, no token" });
     }
-  }
 
-  return res.status(401).json({ message: "No token, access denied" });
+    const token = authHeader.split(" ")[1];
+
+    // הטוקן שלך נוצר כ: { id: user._id, role: user.role }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded.id).select("-password");
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    req.user = user; // כולל role
+    next();
+  } catch (err) {
+    console.error("protectRoute error:", err.message);
+    return res.status(401).json({ message: "Token is invalid" });
+  }
 };
 
-module.exports = protectRoute;
+module.exports = { protect };

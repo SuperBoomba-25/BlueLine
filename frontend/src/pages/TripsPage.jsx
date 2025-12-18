@@ -72,7 +72,12 @@ function TripsPage() {
 
                 <p>💸 {trip.price} ₪</p>
 
-                {trip.description && <p>{trip.description}</p>}
+                {trip.description && (
+                  <div className="trip-includes">
+                    <p className="includes-title">✔ מה כלול בטיול</p>
+                    <p className="includes-text">{trip.description}</p>
+                  </div>
+                )}
 
                 <p>
                   🧍‍♂ מקומות פנויים:{" "}
