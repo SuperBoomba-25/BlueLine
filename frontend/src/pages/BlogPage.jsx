@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
-import { Link } from "react-router-dom"; // ✅ ייבוא Link
+import { Link } from "react-router-dom";
 import "./BlogPage.css";
 
 function BlogPage() {
   const [posts, setPosts] = useState([]);
-  // ❌ הוסר: const [socket, setSocket] = useState(null); // תיקון שגיאת CI
 
   // בדיקה אם המשתמש מחובר
   const user = JSON.parse(localStorage.getItem("user"));
