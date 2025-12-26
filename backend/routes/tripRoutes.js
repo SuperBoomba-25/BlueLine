@@ -1,14 +1,45 @@
+const express = require("express");
+const router = express.Router();
+const Trip = require("../models/Trip");
+const { protect } = require("../middleware/protectRoute");
+
 // ------------------
-// POST – הרשמה לטיול (רק משתמש מחובר)
+// GET – כל הטיולים
+// ------------------
+router.get("/", async (req, res) => {
+  try {
+    const trips = await Trip.find();
+    res.json(trips);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// ------------------
+// GET – טיול לפי ID
+// ------------------
+router.get("/:id", async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+
+    res.json(trip);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ------------------
+// POST – הרשמה לטיול
 // ------------------
 router.post("/:id/enroll", protect, async (req, res) => {
+  const userId = req.user._id.toString();
+
   try {
-    const userId = req.user._id.toString();
+    const userId = req.user.id;
     const trip = await Trip.findById(req.params.id);
 
-    if (!trip) {
-      return res.status(404).json({ message: "Trip not found" });
-    }
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
 
     // אם הטיול מלא
     if (trip.participants.length >= trip.maxParticipants) {
@@ -19,7 +50,6 @@ router.post("/:id/enroll", protect, async (req, res) => {
     const already = trip.participants.some(
       (p) => p.userId.toString() === userId
     );
-
     if (already) {
       return res.status(400).json({ message: "אתה כבר רשום לטיול הזה" });
     }
@@ -29,12 +59,31 @@ router.post("/:id/enroll", protect, async (req, res) => {
     trip.checkIfFull();
     await trip.save();
 
-    res.json({
-      message: "נרשמת בהצלחה!",
-      trip,
-    });
+    res.json({ message: "נרשמת בהצלחה!", trip });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
+
+// ------------------
+// GET – בדיקת סטטוס מלא/פנוי
+// ------------------
+router.get("/:id/status", async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+
+    const isFull = trip.participants.length >= trip.maxParticipants;
+
+    res.json({
+      isFull,
+      participants: trip.participants.length,
+      maxParticipants: trip.maxParticipants,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+module.exports = router;
