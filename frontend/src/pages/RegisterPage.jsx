@@ -1,7 +1,6 @@
-// frontend/src/pages/RegisterPage.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api"; // axios instance עם baseURL ל-API
+import api from "../api";
 
 function RegisterPage() {
   const [form, setForm] = useState({
@@ -23,7 +22,6 @@ function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    // בדיקות בסיסיות בצד לקוח
     if (!form.name || !form.email || !form.password) {
       setError("אנא מלא את כל השדות");
       return;
@@ -42,26 +40,18 @@ function RegisterPage() {
     try {
       setLoading(true);
 
-      // שולחים ל-API שלנו (authRoutes: POST /api/register)
-      const res = await api.post("/register", {
+      await api.post("/register", {
         name: form.name,
         email: form.email,
         password: form.password,
         role: form.role,
       });
 
-      console.log("Register response:", res.data);
-
       alert("נרשמת בהצלחה! עכשיו תוכל להתחבר.");
-
-      // אחרי הרשמה – נשלח למסך התחברות
       navigate("/login");
     } catch (err) {
-      console.error("Register error:", err.response?.data || err);
-
       const msg =
         err.response?.data?.message || "שגיאה בהרשמה. בדוק את הפרטים ונסה שוב.";
-
       setError(msg);
     } finally {
       setLoading(false);
@@ -130,22 +120,6 @@ function RegisterPage() {
           />
         </div>
 
-        {/* אם תרצה בעתיד לבחור תפקיד */}
-        {/* 
-        <div className="form-group" style={{ marginBottom: "12px" }}>
-          <label>תפקיד</label>
-          <select
-            name="role"
-            value={form.role}
-            onChange={handleChange}
-            style={{ width: "100%", padding: "8px" }}
-          >
-            <option value="user">משתמש רגיל</option>
-            <option value="admin">מנהל (admin)</option>
-          </select>
-        </div>
-        */}
-
         {error && <p style={{ color: "red", marginBottom: "10px" }}>{error}</p>}
 
         <button
@@ -158,7 +132,7 @@ function RegisterPage() {
             color: "white",
             border: "none",
             borderRadius: "4px",
-            cursor: "pointer",
+            cursor: loading ? "not-allowed" : "pointer",
           }}
         >
           {loading ? "נרשם..." : "הרשמה"}
