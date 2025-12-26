@@ -1,4 +1,4 @@
-const User = require("../models/User"); // ← תיקון: models ולא model
+const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
 // יצירת טוקן
