@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Course = require("../models/Course");
-const { protect } = require("../middleware/protectRoutes");
+const { protect } = require("../middleware/protectRoute");
 
 // GET – כל הקורסים
 
