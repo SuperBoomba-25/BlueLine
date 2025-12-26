@@ -1,18 +1,28 @@
-import { Link, useNavigate } from "react-router-dom";
-// ייבוא נכון של קובץ ה-CSS, בהנחה שהוא באותה תיקייה
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import "./Sidebar.css";
 
 function Header() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const location = useLocation(); // גורם ל-Component להתרנדר מחדש במעבר דפים
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      setUser(null);
+    }
+  }, [location]); // בכל פעם שהדף משתנה, הוא יבדוק אם המשתמש מחובר
 
   const logoutHandler = () => {
-    localStorage.removeItem("user");
+    localStorage.clear(); // מנקה הכל
+    setUser(null);
     navigate("/login");
   };
 
   return (
-    // הוספת className="sidebar" לתיקון הפריסה והחלת העיצוב
     <aside className="sidebar">
       <h2>BlueLine</h2>
       <nav>
@@ -24,8 +34,10 @@ function Header() {
         {user ? (
           <>
             <Link to="/profile">הפרופיל שלי</Link>
-            <button onClick={logoutHandler}>התנתקות</button>
-            <p>שלום {user.name}</p>
+            <p className="welcome-msg">שלום {user.name}</p>
+            <button className="logout-btn" onClick={logoutHandler}>
+              התנתקות
+            </button>
           </>
         ) : (
           <>

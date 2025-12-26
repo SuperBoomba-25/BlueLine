@@ -32,7 +32,7 @@ router.get("/:id", async (req, res) => {
 // ------------------
 // POST – הרשמה לטיול
 // ------------------
-router.post("/:id/enroll", protect, async (req, res) => {
+router.post("/:id/register", protect, async (req, res) => {
   const userId = req.user._id.toString();
 
   try {
