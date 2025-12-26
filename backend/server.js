@@ -1,7 +1,9 @@
 const express = require("express");
 const http = require("http");
-const { Server } = require("socket.io");
 const dotenv = require("dotenv");
+dotenv.config({ path: "./.env" });
+
+const { Server } = require("socket.io");
 const cors = require("cors");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
@@ -24,7 +26,6 @@ const surfRoutes = require("./routes/surf");
 const forumRoutes = require("./routes/forumRoutes");
 
 // 🟢 Load environment variables
-dotenv.config({ path: "./.env" });
 
 // 🟢 Connect to MongoDB
 connectDB(); // או connectToDB();
