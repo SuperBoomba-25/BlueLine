@@ -4,9 +4,10 @@ import "./Sidebar.css";
 
 function Header() {
   const navigate = useNavigate();
-  const location = useLocation(); // גורם ל-Component להתרנדר מחדש במעבר דפים
+  const location = useLocation(); // מאזין לשינויי דפים
   const [user, setUser] = useState(null);
 
+  // בכל פעם שהמיקום (URL) משתנה, נבדוק מחדש אם יש משתמש ב-Storage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -14,10 +15,10 @@ function Header() {
     } else {
       setUser(null);
     }
-  }, [location]); // בכל פעם שהדף משתנה, הוא יבדוק אם המשתמש מחובר
+  }, [location]);
 
   const logoutHandler = () => {
-    localStorage.clear(); // מנקה הכל
+    localStorage.clear(); // מנקה את כל הנתונים (token, user, וכו')
     setUser(null);
     navigate("/login");
   };
@@ -34,10 +35,25 @@ function Header() {
         {user ? (
           <>
             <Link to="/profile">הפרופיל שלי</Link>
-            <p className="welcome-msg">שלום {user.name}</p>
-            <button className="logout-btn" onClick={logoutHandler}>
-              התנתקות
-            </button>
+            <div className="user-info">
+              <span
+                style={{ color: "white", display: "block", margin: "10px 0" }}
+              >
+                שלום {user.name} 👋
+              </span>
+              <button
+                onClick={logoutHandler}
+                style={{
+                  background: "red",
+                  color: "white",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "5px",
+                }}
+              >
+                התנתקות
+              </button>
+            </div>
           </>
         ) : (
           <>

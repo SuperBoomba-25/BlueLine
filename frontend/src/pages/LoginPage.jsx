@@ -20,17 +20,26 @@ function LoginPage() {
         password: form.password,
       });
 
+      // --- התיקון כאן ---
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.role);
-      localStorage.setItem("userId", res.data._id);
+
+      // יצירת אובייקט משתמש מסודר שמתאים למה שה-Header מצפה לקבל
+      const userData = {
+        _id: res.data._id,
+        name: res.data.name,
+        role: res.data.role,
+      };
+      localStorage.setItem("user", JSON.stringify(userData));
 
       alert("התחברת בהצלחה!");
 
-      if (res.data.user.role === "admin") {
+      // בדיקת ה-role ישירות מהתגובה
+      if (res.data.role === "admin") {
         navigate("/admin");
       } else {
         navigate("/");
       }
+      // ------------------
     } catch (err) {
       alert(err.response?.data?.message || "שגיאה בהתחברות");
       console.error("Login error:", err);
@@ -39,9 +48,8 @@ function LoginPage() {
 
   return (
     <div className="container">
-            <h2>התחברות</h2>     {" "}
+      <h2>התחברות</h2>
       <form onSubmit={handleSubmit}>
-               {" "}
         <input
           name="email"
           placeholder="אימייל"
@@ -49,7 +57,6 @@ function LoginPage() {
           required
           autoComplete="username"
         />
-               {" "}
         <input
           name="password"
           placeholder="סיסמה"
@@ -58,10 +65,9 @@ function LoginPage() {
           required
           autoComplete="current-password"
         />
-                {error && <p style={{ color: "red" }}>{error}</p>}       {" "}
-        <button type="submit">התחברות</button>     {" "}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        <button type="submit">התחברות</button>
       </form>
-         {" "}
     </div>
   );
 }
