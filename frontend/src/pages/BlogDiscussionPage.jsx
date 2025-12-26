@@ -1,7 +1,6 @@
 // frontend/src/pages/BlogDiscussionPage.jsx
-
 import React, { useEffect, useState } from "react";
-import { useState } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 function BlogDiscussionPage() {
   const { postId } = useParams();
