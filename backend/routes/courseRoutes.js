@@ -1,11 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Course = require("../models/Course");
-const authMiddleware = require("../middleware/authMiddleware");
 const { protect } = require("../middleware/protectRoutes");
-// ------------------
+
 // GET – כל הקורסים
-// ------------------
+
 router.get("/", async (req, res) => {
   try {
     const courses = await Course.find();
@@ -32,7 +31,9 @@ router.get("/:id", async (req, res) => {
 // ------------------
 // POST – הרשמה לקורס (רק משתמש מחובר)
 // ------------------
-router.post("/:id/enroll", authMiddleware, async (req, res) => {
+router.post("/:id/enroll", protect, async (req, res) => {
+  const userId = req.user._id.toString();
+
   try {
     const userId = req.user.id;
     const course = await Course.findById(req.params.id);

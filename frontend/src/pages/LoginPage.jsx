@@ -20,9 +20,9 @@ function LoginPage() {
         password: form.password,
       });
 
-      localStorage.setItem("user", JSON.stringify(res.data.user));
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.user.role);
+      localStorage.setItem("role", res.data.role);
+      localStorage.setItem("userId", res.data._id);
 
       alert("התחברת בהצלחה!");
 

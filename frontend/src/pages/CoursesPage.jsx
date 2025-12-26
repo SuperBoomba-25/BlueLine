@@ -7,6 +7,10 @@ function CoursesPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // בדיקת התחברות וזיהוי משתמש
+  const isLoggedIn = !!localStorage.getItem("token");
+  const userId = localStorage.getItem("userId");
+
   useEffect(() => {
     api
       .get("/courses")
@@ -25,13 +29,9 @@ function CoursesPage() {
       const res = await api.post(`/courses/${courseId}/enroll`);
       setMessage(res.data.message);
 
-      // עדכון מקומי של משתתפים
+      // עדכון נכון: מחליפים את הקורס הישן באובייקט המעודכן שהגיע מהשרת
       setCourses((prev) =>
-        prev.map((c) =>
-          c._id === courseId
-            ? { ...c, participants: [...c.participants, "x"] }
-            : c
-        )
+        prev.map((c) => (c._id === courseId ? res.data.course : c))
       );
     } catch (err) {
       setMessage(err.response?.data?.message || "שגיאה בהרשמה");
@@ -54,6 +54,10 @@ function CoursesPage() {
       <div className="courses-grid">
         {courses.map((course) => {
           const spotsLeft = course.maxParticipants - course.participants.length;
+          // בדיקה האם המשתמש הנוכחי כבר נמצא ברשימת המשתתפים של הקורס
+          const isAlreadyEnrolled = course.participants.some(
+            (p) => p.userId === userId || p.userId?._id === userId
+          );
 
           return (
             <div key={course._id} className="course-card">
@@ -69,22 +73,21 @@ function CoursesPage() {
                 <h3>{course.name}</h3>
 
                 <p className="course-level">
-                  🏄‍♂ <strong>רמה:</strong> {course.level}
+                  | 🏄‍♂️ <strong>רמה:</strong> {course.level}
                 </p>
 
                 <p className="course-price">
-                  💸 <strong>מחיר:</strong> {course.price} ₪
+                  | 💸 <strong>מחיר:</strong> {course.price} ₪
                 </p>
 
                 <p className="course-duration">
-                  ⏱ <strong>משך הקורס:</strong> {course.duration}
+                  | ⏱ <strong>משך הקורס:</strong> {course.duration}
                 </p>
 
                 {course.description && (
                   <p className="course-description">{course.description}</p>
                 )}
 
-                {/* כותרת "מה כלול" לפני התוכן */}
                 {course.includes && course.includes.length > 0 && (
                   <>
                     <h4 className="includes-title">🎒 מה כלול בקורס?</h4>
@@ -97,24 +100,39 @@ function CoursesPage() {
                 )}
 
                 <p className="course-ages">
-                  👤 <strong>גילאים מתאימים:</strong> {course.minAge}–
+                  | 👤 <strong>גילאים מתאימים:</strong> {course.minAge}–
                   {course.maxAge}
                 </p>
 
                 <p className="course-spots">
-                  🧍‍♂ מקומות פנויים:{" "}
+                  | 🧍‍♂️ מקומות פנויים:{" "}
                   <strong style={{ color: spotsLeft === 0 ? "red" : "green" }}>
                     {spotsLeft === 0 ? "מלא" : spotsLeft}
                   </strong>
                 </p>
 
-                <button
-                  className="enroll-btn"
-                  disabled={spotsLeft === 0}
-                  onClick={() => enrollCourse(course._id)}
-                >
-                  {spotsLeft === 0 ? "הקורס מלא" : "להרשמה לקורס"}
-                </button>
+                <div className="action-area">
+                  {isAlreadyEnrolled ? (
+                    <button disabled className="enroll-btn enrolled">
+                      אתה כבר רשום לקורס זה
+                    </button>
+                  ) : spotsLeft === 0 ? (
+                    <button disabled className="enroll-btn full">
+                      הקורס מלא
+                    </button>
+                  ) : !isLoggedIn ? (
+                    <p style={{ color: "red", fontWeight: "bold" }}>
+                      יש להתחבר כדי להירשם
+                    </p>
+                  ) : (
+                    <button
+                      className="enroll-btn"
+                      onClick={() => enrollCourse(course._id)}
+                    >
+                      להרשמה לקורס
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           );
