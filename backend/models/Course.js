@@ -1,41 +1,49 @@
 const mongoose = require("mongoose");
 
-const courseSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  level: {
-    type: String,
-    enum: ["מתחילים", "ביניים", "מתקדמים", "כל הרמות"],
-    required: true,
+const courseSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    description: String,
+    price: { type: Number, required: true },
+    image: String, // קישור לתמונה
+    level: String, // מתחילים/מתקדמים
+    duration: String, // משך הקורס
+    minAge: Number,
+    maxAge: Number,
+    maxParticipants: { type: Number, required: true },
+
+    // מערך המשתתפים (כולל השינויים החדשים)
+    participants: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        enrolledAt: { type: Date, default: Date.now },
+
+        // --- השדות החדשים להצהרת בריאות ותשלום ---
+        healthDeclaration: {
+          declared: { type: Boolean, default: false },
+          swimming: { type: Boolean, default: false },
+          timestamp: Date,
+        },
+        paymentStatus: {
+          paid: { type: Boolean, default: false },
+          last4Digits: String,
+          date: Date,
+        },
+      },
+    ],
+
+    // רשימת "מה כלול" (אופציונלי)
+    includes: [String],
   },
-  price: { type: Number, required: true },
+  { timestamps: true }
+);
 
-  duration: { type: String },
-  description: { type: String },
-  image: { type: String },
-
-  minAge: { type: Number, default: 10 },
-  maxAge: { type: Number, default: 70 },
-
-  includes: [
-    {
-      type: String, // לדוגמה: "טיסות", "מלון", "השכרת גלשן"
-    },
-  ],
-
-  maxParticipants: { type: Number, default: 12 },
-  participants: [
-    {
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      registeredAt: { type: Date, default: Date.now },
-    },
-  ],
-
-  isFull: { type: Boolean, default: false },
-});
-
+// פונקציה לבדוק אם מלא (למקרה שמשתמשים בה)
 courseSchema.methods.checkIfFull = function () {
-  this.isFull = this.participants.length >= this.maxParticipants;
-  return this.isFull;
+  return this.participants.length >= this.maxParticipants;
 };
 
 module.exports = mongoose.model("Course", courseSchema);

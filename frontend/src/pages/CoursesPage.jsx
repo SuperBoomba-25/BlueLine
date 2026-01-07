@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
-import api from "../api"; // axios עם baseURL = '/api'
+import api from "../api";
 import "./CoursesPage.css";
+import CourseRegistrationModal from "./CourseRegistrationModal"; // וודא שהנתיב נכון
 
 function CoursesPage() {
   const [courses, setCourses] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // בדיקת התחברות וזיהוי משתמש
+  // סטייט לניהול הקורס שנבחר להרשמה (עבור המודאל)
+  const [selectedCourse, setSelectedCourse] = useState(null);
+
   const isLoggedIn = !!localStorage.getItem("token");
   const userId = localStorage.getItem("userId");
 
@@ -24,17 +27,39 @@ function CoursesPage() {
       });
   }, []);
 
-  const enrollCourse = async (courseId) => {
+  // פונקציה לפתיחת המודאל
+  const handleEnrollClick = (course) => {
+    if (!isLoggedIn) {
+      setMessage("יש להתחבר כדי להירשם");
+      return;
+    }
+    setSelectedCourse(course);
+  };
+
+  // פונקציה לאישור סופי מתוך המודאל
+  const handleRegistrationConfirm = async (registrationData) => {
+    if (!selectedCourse) return;
+
     try {
-      const res = await api.post(`/courses/${courseId}/enroll`);
+      // שליחת בקשה לשרת עם נתוני הבריאות והתשלום
+      const res = await api.post(`/courses/${selectedCourse._id}/enroll`, {
+        healthData: registrationData.healthData,
+        paymentData: registrationData.paymentData,
+      });
+
       setMessage(res.data.message);
 
-      // עדכון נכון: מחליפים את הקורס הישן באובייקט המעודכן שהגיע מהשרת
+      // עדכון הקורס ברשימה המקומית
       setCourses((prev) =>
-        prev.map((c) => (c._id === courseId ? res.data.course : c))
+        prev.map((c) => (c._id === selectedCourse._id ? res.data.course : c))
       );
+
+      // סגירת המודאל והצגת הודעת הצלחה
+      setSelectedCourse(null);
+      alert("נרשמת בהצלחה! אישור נשלח למייל.");
     } catch (err) {
       setMessage(err.response?.data?.message || "שגיאה בהרשמה");
+      setSelectedCourse(null);
     }
   };
 
@@ -45,8 +70,7 @@ function CoursesPage() {
       <h1>🎓 קורסים גלישה</h1>
       <p className="intro">
         כאן תוכלו למצוא קורסי גלישה לכל הרמות – ממתחילים שעולים על הגלשן בפעם
-        הראשונה, ועד גולשים מתקדמים שרוצים לשפר טכניקה, קריאת ים וביצועים על
-        הגל.
+        הראשונה, ועד גולשים מתקדמים שרוצים לשפר טכניקה.
       </p>
 
       {message && <p className="info-box">{message}</p>}
@@ -54,7 +78,6 @@ function CoursesPage() {
       <div className="courses-grid">
         {courses.map((course) => {
           const spotsLeft = course.maxParticipants - course.participants.length;
-          // בדיקה האם המשתמש הנוכחי כבר נמצא ברשימת המשתתפים של הקורס
           const isAlreadyEnrolled = course.participants.some(
             (p) => p.userId === userId || p.userId?._id === userId
           );
@@ -71,15 +94,12 @@ function CoursesPage() {
 
               <div className="course-info">
                 <h3>{course.name}</h3>
-
                 <p className="course-level">
                   | 🏄‍♂️ <strong>רמה:</strong> {course.level}
                 </p>
-
                 <p className="course-price">
                   | 💸 <strong>מחיר:</strong> {course.price} ₪
                 </p>
-
                 <p className="course-duration">
                   | ⏱ <strong>משך הקורס:</strong> {course.duration}
                 </p>
@@ -100,8 +120,7 @@ function CoursesPage() {
                 )}
 
                 <p className="course-ages">
-                  | 👤 <strong>גילאים מתאימים:</strong> {course.minAge}–
-                  {course.maxAge}
+                  | 👤 <strong>גילאים:</strong> {course.minAge}–{course.maxAge}
                 </p>
 
                 <p className="course-spots">
@@ -114,7 +133,7 @@ function CoursesPage() {
                 <div className="action-area">
                   {isAlreadyEnrolled ? (
                     <button disabled className="enroll-btn enrolled">
-                      אתה כבר רשום לקורס זה
+                      אתה כבר רשום
                     </button>
                   ) : spotsLeft === 0 ? (
                     <button disabled className="enroll-btn full">
@@ -127,7 +146,7 @@ function CoursesPage() {
                   ) : (
                     <button
                       className="enroll-btn"
-                      onClick={() => enrollCourse(course._id)}
+                      onClick={() => handleEnrollClick(course)}
                     >
                       להרשמה לקורס
                     </button>
@@ -138,6 +157,15 @@ function CoursesPage() {
           );
         })}
       </div>
+
+      {/* רכיב המודאל - מופיע רק כשנבחר קורס */}
+      {selectedCourse && (
+        <CourseRegistrationModal
+          course={selectedCourse}
+          onClose={() => setSelectedCourse(null)}
+          onConfirm={handleRegistrationConfirm}
+        />
+      )}
     </div>
   );
 }
