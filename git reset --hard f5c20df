@@ -1,0 +1,72 @@
+[33mf5c20dfb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m fix: github eror
+[33m2c2bbd44[m fix: login navigation and header user sync
+[33m60b87324[m fix: login navigation and header user sync
+[33me1e4a97a[m fix: login navigation and header user sync
+[33m8d7cf851[m fix: login navigation and header user sync
+[33mcfc3963c[m fix: login persistence, trip route 404 and header sync
+[33mb9e29869[m fix: remove duplicate useState and unused Link
+[33mbc071032[m fix: destructure middleware imports in userRoutes
+[33m2d2263ff[m fix: destructure middleware imports in userRoutes
+[33mf8909356[m refactor: unified middleware to protectRoutes and updated imports
+[33m7109e959[m refactor: unified middleware to protectRoutes and updated imports
+[33m2a61ee68[m fix: remove unused Link to pass CI build
+[33mb33d452e[m Merge pull request #4 from Myproject-DevTeam/tesk/TBLU-001-test-connection
+[33mcf3d8dfe[m Fix eror
+[33m2dd3c7e3[m TBLU-001: test
+[33m862f74eb[m new Update
+[33m0f868231[m new Update
+[33m570a5e94[m new Update
+[33mb8065e52[m new Update
+[33me101b587[m new Update
+[33mfe91b0a3[m new Update
+[33m2597941f[m new Update
+[33m886f1eeb[m fix: switch to bcryptjs onbackend
+[33m547c9d2e[m clean repo for Vercel deploy
+[33m8c03f868[m clean repo for Vercel deploy
+[33m3ea1199f[m clean repo for Vercel deploy
+[33m9ec430d6[m Fix: Final attempt to fix eror500
+[33meac742f3[m Fix: Final attempt to fix eror500
+[33mc086169c[m Fix: Final attempt to fix eror500
+[33m0248c7a6[m Fix: Final attempt to fix eror500
+[33ma9bea462[m Fix: New reCAPTCHA Site Key
+[33mf398f5b7[m Fix: Final attempt to fix eror500
+[33m1fd7cc43[m Fix: Final attempt to fix eror500
+[33m06a2ecec[m Fix
+[33mde59c1c1[m Fix: Final attempt to fix eror500
+[33m03db5493[m Fix: Final attempt to fix eror500
+[33m60dd3970[m Fix: Final attempt to fix 404 and 500 errors in routes
+[33md1efcc28[m Stop tracking node_modules in backend
+[33m67828542[m Merge branch 'main' of https://github.com/Myproject-DevTeam/BlueLine
+[33m7c3ab891[m first upload
+[33m0f5d46dc[m Merge pull request #3 from Myproject-DevTeam/feature/implement-discussion-logic
+[33m17adbf0e[m[33m ([m[1;31morigin/feature/implement-discussion-logic[m[33m)[m Fix: Bypassed reCAPTCHA in backend login to resolve 500 error. Implemented BlogPostPage component and routing.
+[33m2172b1a3[m Merge pull request #2 from Myproject-DevTeam/feature/ui-cleanup-and-blog-fix
+[33ma04977ae[m new blog
+[33mfedca734[m Merge pull request #1 from Myproject-DevTeam/feature/nav-blog-discussion
+[33m4514f119[m[33m ([m[1;31morigin/feature/nav-blog-discussion[m[33m, [m[1;32mfeature/nav-blog-discussion[m[33m)[m Feature: Implement all navigation links and conditional blog discussion link
+[33m02ab2754[m Fix CI: Allow backend tests to pass when no tests are defined
+[33mbaeed04a[m Final attempt: Fix CI permission denied with recursive chmod on node_modules/.bin
+[33mf17ab398[m Final fix for CI: ESLint dependency and npm run
+[33m9ad7527a[m Merge branch 'main' of https://github.com/Myproject-DevTeam/BlueLine
+[33m3c4e214a[m Fix CI: Resolve exit code 127 by adding eslint dependency and using npm run lint
+[33md28a51dc[m Fix: ESLint permissions in CI workflow
+[33m2722c866[m Fix ESLint permissions in CI workflow
+[33md5f812e0[m Fix: ESLint warnings after running frontend lint
+[33m63e5cc2a[m Fix CI pipeline: use npx build and add lint
+[33mf9f60433[m Fixed CI pipeline
+[33mb4913c4d[m Remove duplicate workflow file main.yml
+[33m799d4a07[m Trigger CI run
+[33mc4d68dda[m Add CI workflow to run tests
+[33m544190c4[m Initial commit with frontend and backend
+[33m78cefa78[m Initial commit with frontend and backend
+[33m31b2932f[m update .gitignore
+[33md38d2b5f[m Update .gitignore with Terraform and DevOps rules
+[33m372de698[m sec update  BlueLine
+[33m9c5a4329[m first update
+[33md73e1a72[m Create ci.yml
+[33m6f0fcf74[m הוספת כל קבצי frontendלפרויקט
+[33mcd21fd91[m Add frontend directory as regular files
+[33m83d4799b[m Remove frontend directory from Git
+[33mdbab7089[m Merge branch 'main' of https://github.com/SuperBoomba/BlueLine Merge remote-tracking branch 'origin/main' into main
+[33mdbebccad[m Initial commit
+[33mfbd89cd9[m Initial commit
