@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-// עכשיו הקובץ הזה באמת קיים, אז השורה הזו תעבוד:
 const Course = require("../models/Course");
 const { protect } = require("../middleware/authMiddleware"); // וודא שהנתיב ל-middleware נכון אצלך
 
