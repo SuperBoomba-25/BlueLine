@@ -11,12 +11,8 @@ const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
 
-// ✅ בחר באחת מהאפשרויות לחיבור
-// 1. שימוש ב-config/db.js
+// חיבור ל-DB
 const connectDB = require("./config/db");
-
-// 2. או שימוש ב-db/mongo.js
-// const { connectToDB } = require("./db/mongo");
 
 const courseRoutes = require("./routes/courseRoutes");
 const tripRoutes = require("./routes/tripRoutes");
@@ -25,37 +21,43 @@ const userRoutes = require("./routes/userRoutes");
 const surfRoutes = require("./routes/surf");
 const forumRoutes = require("./routes/forumRoutes");
 
-// 🟢 Load environment variables
-
 // 🟢 Connect to MongoDB
-connectDB(); // או connectToDB();
+connectDB();
 
 const app = express();
 const server = http.createServer(app);
 
-// 💡 CORS
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://blueline-yyzo.onrender.com",
-];
+// 👇👇👇 התיקון נמצא כאן 👇👇👇
 
+// במקום רשימה סגורה, נשתמש בהגדרה שמאפשרת גישה דינמית
+// זה יפתור לך את הבעיה עם 10.0.0.4 וגם עם localhost
 const corsOptions = {
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    // מאפשר בקשות ללא origin (כמו אפליקציות מובייל או curl)
+    if (!origin) return callback(null, true);
+
+    // מאפשר כל מקור (Origin) שמנסה להתחבר
+    // בגלל שאתה בפיתוח, זה הפתרון הכי נוח כדי שלא תצטרך להוסיף כל פעם IP חדש
+    callback(null, true);
+  },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true,
+  credentials: true, // חובה בשביל קוקיז/התחברות
 };
+
+// 👆👆👆 סוף התיקון 👆👆👆
 
 const io = new Server(server, { cors: corsOptions });
 
 // 🟢 Middleware
 app.set("trust proxy", 1);
 app.use(express.json());
-app.use(cors(corsOptions));
+app.use(cors(corsOptions)); // שימוש בהגדרות החדשות
 app.use(helmet());
 app.use(mongoSanitize());
 app.use(xss());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(morgan("combined"));
+
 // 🟢 Routes
 app.use("/api/trips", tripRoutes);
 app.use("/api/courses", courseRoutes);
