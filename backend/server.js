@@ -36,15 +36,11 @@ const corsOptions = {
     // מאפשר בקשות ללא origin (כמו אפליקציות מובייל או curl)
     if (!origin) return callback(null, true);
 
-    // מאפשר כל מקור (Origin) שמנסה להתחבר
-    // בגלל שאתה בפיתוח, זה הפתרון הכי נוח כדי שלא תצטרך להוסיף כל פעם IP חדש
     callback(null, true);
   },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true, // חובה בשביל קוקיז/התחברות
 };
-
-// 👆👆👆 סוף התיקון 👆👆👆
 
 const io = new Server(server, { cors: corsOptions });
 
