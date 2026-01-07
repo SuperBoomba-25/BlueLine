@@ -11,7 +11,6 @@ const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
 
-// חיבור ל-DB
 const connectDB = require("./config/db");
 
 const courseRoutes = require("./routes/courseRoutes");
@@ -21,25 +20,24 @@ const userRoutes = require("./routes/userRoutes");
 const surfRoutes = require("./routes/surf");
 const forumRoutes = require("./routes/forumRoutes");
 
+// 🟢 Load environment variables
+
 // 🟢 Connect to MongoDB
-connectDB();
+connectDB(); // או connectToDB();
 
 const app = express();
 const server = http.createServer(app);
 
-// 👇👇👇 התיקון נמצא כאן 👇👇👇
+// 💡 CORS
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://blueline-yyzo.onrender.com",
+];
 
-// במקום רשימה סגורה, נשתמש בהגדרה שמאפשרת גישה דינמית
-// זה יפתור לך את הבעיה עם 10.0.0.4 וגם עם localhost
 const corsOptions = {
-  origin: (origin, callback) => {
-    // מאפשר בקשות ללא origin (כמו אפליקציות מובייל או curl)
-    if (!origin) return callback(null, true);
-
-    callback(null, true);
-  },
+  origin: allowedOrigins,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true, // חובה בשביל קוקיז/התחברות
+  credentials: true,
 };
 
 const io = new Server(server, { cors: corsOptions });
@@ -47,13 +45,12 @@ const io = new Server(server, { cors: corsOptions });
 // 🟢 Middleware
 app.set("trust proxy", 1);
 app.use(express.json());
-app.use(cors(corsOptions)); // שימוש בהגדרות החדשות
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(mongoSanitize());
 app.use(xss());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(morgan("combined"));
-
 // 🟢 Routes
 app.use("/api/trips", tripRoutes);
 app.use("/api/courses", courseRoutes);
