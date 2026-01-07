@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const Trip = require("../models/Trip");
-const { protect } = require("../middleware/protectRoute");
 
-// ------------------
+const { protect } = require("../middleware/authMiddleware");
+
 // GET – כל הטיולים
-// ------------------
+
 router.get("/", async (req, res) => {
   try {
     const trips = await Trip.find();
@@ -30,13 +30,16 @@ router.get("/:id", async (req, res) => {
 });
 
 // ------------------
-// POST – הרשמה לטיול
+// POST – הרשמה לטיול (מעודכן עם בריאות ותשלום)
 // ------------------
-router.post("/:id/register", protect, async (req, res) => {
-  const userId = req.user._id.toString();
-
+router.post("/:id/enroll", protect, async (req, res) => {
   try {
-    const userId = req.user.id;
+    // קבלת המידע מהמשתמש המחובר
+    const userId = req.user._id;
+
+    // קבלת המידע החדש מהטופס (בריאות ותשלום)
+    const { healthData, paymentData } = req.body;
+
     const trip = await Trip.findById(req.params.id);
 
     if (!trip) return res.status(404).json({ message: "Trip not found" });
@@ -48,19 +51,40 @@ router.post("/:id/register", protect, async (req, res) => {
 
     // אם המשתמש כבר רשום
     const already = trip.participants.some(
-      (p) => p.userId.toString() === userId
+      (p) => p.userId.toString() === userId.toString()
     );
     if (already) {
       return res.status(400).json({ message: "אתה כבר רשום לטיול הזה" });
     }
 
-    // הוספת המשתמש
-    trip.participants.push({ userId });
-    trip.checkIfFull();
+    // יצירת אובייקט המשתתף החדש
+    const newParticipant = {
+      userId: userId,
+      healthDeclaration: {
+        declared: healthData?.declared || false,
+        swimming: healthData?.swimming || false,
+        timestamp: new Date(),
+      },
+      paymentStatus: {
+        paid: true,
+        last4Digits: paymentData?.last4Digits || "0000",
+        date: new Date(),
+      },
+    };
+
+    // הוספת המשתמש ושמירה
+    trip.participants.push(newParticipant);
+
+    // אם יש פונקציה לבדיקת מלאות במודל
+    if (typeof trip.checkIfFull === "function") {
+      trip.checkIfFull();
+    }
+
     await trip.save();
 
-    res.json({ message: "נרשמת בהצלחה!", trip });
+    res.json({ message: "נרשמת לטיול בהצלחה!", trip });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
