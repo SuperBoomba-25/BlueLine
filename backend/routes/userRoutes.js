@@ -1,10 +1,7 @@
 const express = require("express");
 const User = require("../models/User");
 const router = express.Router();
-
-// ייבוא מותאם לצורת הייצוא
-const { protect } = require("../middleware/authMiddleware");
-const admin = require("../middleware/admin");
+const { protect, admin } = require("../middleware/authMiddleware");
 
 router.get("/", protect, admin, async (req, res) => {
   try {
