@@ -3,7 +3,7 @@ const User = require("../models/User");
 const router = express.Router();
 
 // ייבוא מותאם לצורת הייצוא
-const { protect } = require("../middleware/protectRoute");
+const { protect } = require("../middleware/authMiddleware");
 const admin = require("../middleware/admin");
 
 router.get("/", protect, admin, async (req, res) => {
