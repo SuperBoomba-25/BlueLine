@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import api from "../api"; // axios עם baseURL = '/api'
+import api from "../api";
 import "./TripsPage.css";
 
 function TripsPage() {
@@ -22,18 +22,20 @@ function TripsPage() {
 
   const registerToTrip = async (tripId) => {
     try {
-      const res = await api.post(`/trips/${tripId}/register`);
+      const res = await api.post(`/trips/${tripId}/enroll`);
+
       setMessage(res.data.message);
 
       // עדכון מקומי של משתתפים
       setTrips((prev) =>
         prev.map((t) =>
           t._id === tripId
-            ? { ...t, participants: [...t.participants, "X"] }
+            ? { ...t, participants: [...t.participants, "X"] } // מעדכן ויזואלית שהצטרף מישהו
             : t
         )
       );
     } catch (err) {
+      console.error(err); // כדאי להוסיף לוג לשגיאה
       setMessage(err.response?.data?.message || "שגיאה בהרשמה");
     }
   };
@@ -52,7 +54,10 @@ function TripsPage() {
 
       <div className="trips-grid">
         {trips.map((trip) => {
-          const spotsLeft = trip.maxParticipants - trip.participants.length;
+          const participantsCount = trip.participants
+            ? trip.participants.length
+            : 0;
+          const spotsLeft = trip.maxParticipants - participantsCount;
 
           return (
             <div key={trip._id} className="trip-card">
@@ -61,37 +66,31 @@ function TripsPage() {
               )}
 
               <div className="trip-info">
-                <h3>{trip.title}</h3>
-
-                <p>📍 {trip.location}</p>
-
-                <p>
-                  🗓 {new Date(trip.startDate).toLocaleDateString("he-IL")} –{" "}
-                  {new Date(trip.endDate).toLocaleDateString("he-IL")}
-                </p>
-
+                <h3>{trip.destination}</h3>{" "}
+                {/* שים לב: במודל שלך זה destination, לא title */}
+                <p>📍 {trip.location || trip.destination}</p>
+                {trip.date && (
+                  <p>🗓 {new Date(trip.date).toLocaleDateString("he-IL")}</p>
+                )}
                 <p>💸 {trip.price} ₪</p>
-
                 {trip.description && (
                   <div className="trip-includes">
                     <p className="includes-title">✔ מה כלול בטיול</p>
                     <p className="includes-text">{trip.description}</p>
                   </div>
                 )}
-
                 <p>
                   🧍‍♂ מקומות פנויים:{" "}
-                  <strong style={{ color: spotsLeft === 0 ? "red" : "green" }}>
-                    {spotsLeft === 0 ? "מלא" : spotsLeft}
+                  <strong style={{ color: spotsLeft <= 0 ? "red" : "green" }}>
+                    {spotsLeft <= 0 ? "מלא" : spotsLeft}
                   </strong>
                 </p>
-
                 <button
                   className="register-btn"
-                  disabled={spotsLeft === 0}
+                  disabled={spotsLeft <= 0}
                   onClick={() => registerToTrip(trip._id)}
                 >
-                  {spotsLeft === 0 ? "הטיול מלא" : "להרשמה לטיול"}
+                  {spotsLeft <= 0 ? "הטיול מלא" : "להרשמה לטיול"}
                 </button>
               </div>
             </div>
