@@ -1,70 +1,61 @@
-// frontend/src/pages/BlogPage.jsx
-
-import { useState, useEffect } from "react";
-import { io } from "socket.io-client";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import api from "../api"; // חיבור לשרת
 import "./BlogPage.css";
 
 function BlogPage() {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // בדיקה אם המשתמש מחובר
-  const user = JSON.parse(localStorage.getItem("user"));
-  const isLoggedIn = !!user;
+  // 1. שליפת פרטי המשתמש מה-Local Storage
+  const userString = localStorage.getItem("user");
+  const user = userString ? JSON.parse(userString) : null;
 
+  // 2. בדיקות הרשאה
+  const isLoggedIn = !!user; // האם מחובר? (בשביל לראות/להגיב בדיונים)
+
+  const canCreatePost =
+    user && (user.role === "admin" || user.role === "employee");
+
+  // 3. טעינת הפוסטים מהשרת
   useEffect(() => {
-    // פוסטים מדומים לדוגמה
-    const dummyPosts = [
-      {
-        id: "1",
-        title: "איך לבחור את הגלשן הראשון שלך?",
-        description:
-          "המדריך השלם לבחירת גלשן למתחילים: סוגים, גובה, חומרי גלם ומה חשוב לדעת לפני הרכישה הראשונה שלך.",
-        image: "/images/blog1.jpg",
-        date: "20 באוגוסט 2025",
-      },
-      {
-        id: "2",
-        title: "5 חופים מומלצים לגלישה בישראל",
-        description:
-          "מכפר שלם ועד אשקלון – החופים הכי טובים למתחילים ומתקדמים כולל תנאים, גישה ומתי הכי כדאי לבוא.",
-        image: "/images/blog2.jpg",
-        date: "15 באוגוסט 2025",
-      },
-      {
-        id: "3",
-        title: "מה כדאי לדעת לפני טיול גלישה בחו״ל?",
-        description:
-          "בדיקת תנאי ים, ביטוחים, ציוד והשכרת גלשנים – כל הטיפים החיוניים לגלישת חו״ל בטוחה ומהנה.",
-        image: "/images/blog3.jpg",
-        date: "8 באוגוסט 2025",
-      },
-    ];
-
-    setPosts(dummyPosts);
-
-    // 🔗 התחברות ל־Socket.IO
-    const newSocket = io("http://localhost:5000");
-
-    // setSocket(newSocket); // ❌ הוסר - תיקון שגיאת CI
-
-    newSocket.on("connect", () => {
-      console.log("🔗 חיבור ל־Socket הצליח מהבלוג!");
-    });
-
-    // 🧹 Cleanup בעת סגירת הקומפוננטה
-    return () => {
-      newSocket.disconnect();
+    const fetchPosts = async () => {
+      try {
+        const res = await api.get("/blog");
+        setPosts(res.data);
+      } catch (err) {
+        console.error("Error fetching blog posts:", err);
+      } finally {
+        setLoading(false);
+      }
     };
+
+    fetchPosts();
   }, []);
+
+  if (loading) {
+    return (
+      <div
+        className="blog-container"
+        style={{ textAlign: "center", marginTop: "50px" }}
+      >
+        <p>טוען פוסטים...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="blog-container">
-      <h1>בלוג הגולשים</h1>
-      <p>כאן תמצאו כתבות, טיפים, מדריכים וחוויות מהעולם המופלא של הגלישה</p>
+      <div
+        className="blog-header"
+        style={{ textAlign: "center", marginBottom: "40px" }}
+      >
+        <h1>בלוג הגולשים 🌊</h1>
+        <p>כאן תמצאו כתבות, טיפים, מדריכים וחוויות מהעולם המופלא של הגלישה</p>
+      </div>
 
-      {/* ✅ הוספת כפתור יצירת אשכול חדש - רק למשתמשים מחוברים */}
-      {isLoggedIn && (
+      {/* ✅ כפתור יצירת אשכול חדש - מוצג רק למנהלים ועובדים! */}
+      {canCreatePost && (
         <div
           className="discussion-actions"
           style={{ marginBottom: "20px", textAlign: "right" }}
@@ -75,9 +66,11 @@ function BlogPage() {
             style={{
               backgroundColor: "#28a745",
               color: "white",
-              padding: "10px 15px",
+              padding: "10px 20px",
               borderRadius: "5px",
               textDecoration: "none",
+              fontWeight: "bold",
+              display: "inline-block",
             }}
           >
             + יצירת אשכול דיון חדש
@@ -87,33 +80,68 @@ function BlogPage() {
 
       <div className="blog-grid">
         {posts.map((post) => (
-          // שמירה על מבנה ה-<div> המקורי
-          <div className="blog-card" key={post.id}>
-            <img src={post.image} alt={post.title} className="blog-image" />
+          <div className="blog-card" key={post._id}>
+            {/* תמונה (אם קיימת) */}
+            {post.image ? (
+              <img src={post.image} alt={post.title} className="blog-image" />
+            ) : (
+              <div className="blog-image-placeholder">🌊</div>
+            )}
+
             <div className="blog-content">
               <h3>{post.title}</h3>
-              <p className="blog-date">📅 {post.date}</p>
-              <p>{post.description}</p>
 
-              {/* 1. קישור "קרא עוד" רגיל (כניסה לבלוג) */}
-              <Link to={`/blog/${post.id}`} className="read-more">
-                קרא עוד
-              </Link>
+              <div
+                className="post-meta"
+                style={{
+                  fontSize: "0.9rem",
+                  color: "#666",
+                  marginBottom: "10px",
+                }}
+              >
+                <span>📅 {new Date(post.createdAt).toLocaleDateString()}</span>
+                <span style={{ marginRight: "10px" }}>
+                  👤 {post.authorName || "מערכת"}
+                </span>
+              </div>
 
-              {/* 2. הקישור המותנה לדיון (רק למחוברים) */}
-              {isLoggedIn && (
-                <Link
-                  to={`/blog/discussion/${post.id}`}
-                  className="read-more discussion-link"
-                  // שינוי קטן ב-CSS כדי להבדיל אותו ויזואלית
-                  style={{ marginRight: "10px", backgroundColor: "#005f86" }}
-                >
-                  אשכול דיון
+              <p>
+                {post.content ? post.content.substring(0, 100) + "..." : ""}
+              </p>
+
+              <div
+                className="card-actions"
+                style={{ marginTop: "auto", display: "flex", gap: "10px" }}
+              >
+                {/* 1. קישור לקריאת הפוסט המלא */}
+                <Link to={`/blog/${post._id}`} className="read-more">
+                  קרא עוד
                 </Link>
-              )}
+
+                {/* 2. קישור לדיון - פתוח לכל המשתמשים הרשומים */}
+                {isLoggedIn && (
+                  <Link
+                    to={`/blog/discussion/${post._id}`}
+                    className="read-more discussion-link"
+                    style={{
+                      backgroundColor: "#005f86",
+                      borderColor: "#005f86",
+                    }}
+                  >
+                    💬 הצטרף לדיון
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         ))}
+
+        {posts.length === 0 && (
+          <p style={{ textAlign: "center", gridColumn: "1/-1" }}>
+            עדיין אין פוסטים בבלוג. מנהלים יכולים להוסיף פוסטים דרך פאנל הניהול
+            או דרך הכפתור למעלה.
+          </p>
+        )}
       </div>
     </div>
   );
