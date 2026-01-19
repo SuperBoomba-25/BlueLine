@@ -1,73 +1,90 @@
-body {
-  margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f9f9f9;
-  direction: rtl;
-}
-.page-container {
-  padding-right: 220px;
-  padding-top: 20px;
-}
-a {
-  text-decoration: none;
-  color: #0077b6;
-}
+/* src/App.css */
 
-a:hover {
-  text-decoration: underline;
-}
+/* --- פריסה ראשית של האפליקציה --- */
 .app-container {
   display: flex;
+  min-height: 100vh;
   direction: rtl;
+  background-color: var(--bg-color); /* שואב מ-index.css */
 }
 
+/* --- אזור התוכן המרכזי --- */
+/* זהו האזור שמשתנה כשעוברים בין דפים */
 .main-content {
-  flex: 1;
-  padding: 20px;
-  margin-right: 220px; /* מפנה מקום ל־Sidebar */
-}
-header,
-aside {
-  font-family: inherit;
+  flex: 1; /* תופס את כל המקום הפנוי */
+  margin-right: 240px; /* מפנה מקום ל-Sidebar הקבוע */
+  padding: 30px;
+  transition: margin-right 0.3s ease; /* אנימציה חלקה אם התפריט נסגר */
+  max-width: 1600px; /* מונע מהתוכן להימתח יותר מדי במסכי ענק */
 }
 
-main {
-  margin-right: 240px; /* מרווח מהתפריט צדדי */
-  padding: 2rem;
-}
-
-button {
-  font-family: inherit;
-  cursor: pointer;
-}
-
-input,
-select,
-textarea {
-  font-family: inherit;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  max-width: 400px;
-}
-.main-content {
-  margin-right: 240px; /* תואם לרוחב ה-sidebar */
-  padding: 20px;
-}
+/* --- כותרות כלליות --- */
 h1,
 h2,
 h3 {
-  color: #023e8a;
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-top: 0;
 }
 
-.container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 2rem;
+/* --- קישורים --- */
+a {
+  text-decoration: none;
+  color: var(--primary-color);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--accent-color);
+  text-decoration: none; /* ביטלנו את הקו התחתון המיושן */
+}
+
+/* --- טפסים כלליים (Forms) --- */
+/* לשימוש בדפים שאין להם עיצוב ספציפי */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 500px;
+  background: var(--surface-color, #ffffff);
+  padding: 30px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+/* כפתורים בתוך אפליקציה */
+button {
+  font-family: "Rubik", sans-serif;
+  cursor: pointer;
+}
+
+/* --- התאמה למובייל (חשוב מאוד!) --- */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .main-content {
+    margin-right: 0; /* מבטל את הרווח של התפריט */
+    padding: 15px; /* פחות רווחים בצדדים */
+    width: 100%;
+  }
+
+  /* במובייל הטפסים יתפסו את כל הרוחב */
+  form {
+    max-width: 100%;
+    padding: 20px;
+  }
+}
+
+/* --- מחלקות עזר (Utilities) --- */
+.text-center {
+  text-align: center;
+}
+.mt-2 {
+  margin-top: 1rem;
+}
+.mb-2 {
+  margin-bottom: 1rem;
 }

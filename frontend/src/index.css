@@ -1,4 +1,30 @@
-/* בסיס כללי לאתר */
+/* src/index.css - Global Styles */
+
+/* 1. ייבוא הפונט */
+@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap");
+
+/* 2. הגדרת המשתנים (Design System) */
+:root {
+  /* צבעים - BlueLine Theme */
+  --primary-color: #0077b6; /* כחול ראשי */
+  --primary-dark: #005fa3; /* כחול כהה (לריחוף) */
+  --secondary-color: #48cae4; /* תכלת */
+  --accent-color: #ff9f1c; /* כתום (להנעה לפעולה) */
+
+  /* רקעים וטקסט */
+  --bg-color: #f8f9fa; /* רקע כללי (אפור בהיר מאוד) */
+  --surface-color: #ffffff; /* צבע כרטיסים/קונטיינרים */
+  --text-main: #2b2d42; /* טקסט ראשי */
+  --text-secondary: #8d99ae; /* טקסט משני */
+
+  /* אפקטים */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --radius: 12px; /* פינות עגולות */
+  --transition: all 0.3s ease; /* אנימציה חלקה */
+}
+
+/* 3. איפוס בסיסי */
 * {
   box-sizing: border-box;
 }
@@ -6,66 +32,135 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f2f4f8;
-  color: #333;
+  font-family: "Rubik", sans-serif; /* הפונט החדש */
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  direction: rtl; /* יישור לימין לכל האתר */
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
 }
 
-/* כותרות */
+/* 4. כותרות */
 h1,
 h2,
-h3 {
-  color: #222;
+h3,
+h4,
+h5,
+h6 {
+  color: var(--primary-color);
+  margin-top: 0;
   margin-bottom: 1rem;
+  font-weight: 700;
 }
 
-/* קישורים */
+/* 5. קישורים */
 a {
-  color: #0077cc;
+  color: var(--primary-color);
   text-decoration: none;
+  transition: var(--transition);
+  font-weight: 500;
 }
 
 a:hover {
-  text-decoration: underline;
+  color: var(--accent-color); /* משתנה לכתום במעבר עכבר */
 }
 
-/* תיבות כלליות */
+/* 6. קונטיינרים ופריסה */
 .container {
-  max-width: 800px;
+  max-width: 1200px; /* רחב יותר למסכים מודרניים */
   margin: 2rem auto;
-  background-color: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  background-color: var(--surface-color);
+  padding: 2.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
+
 .main-content {
   margin-right: 240px; /* תואם לרוחב ה-sidebar */
-  padding: 20px;
+  padding: 30px;
+  min-height: 100vh;
+  transition: margin-right 0.3s ease;
 }
-/* כפתורים */
+
+/* 7. כפתורים (גלובלי) */
 button {
-  background-color: #0077cc;
+  background: linear-gradient(
+    135deg,
+    var(--secondary-color),
+    var(--primary-color)
+  );
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 0.6rem 1.2rem;
+  border-radius: 50px; /* כפתור עגול ומודרני */
+  padding: 0.8rem 2rem;
   cursor: pointer;
   font-size: 1rem;
-  margin-top: 1rem;
-  transition: background-color 0.2s ease-in-out;
+  font-weight: 600;
+  font-family: "Rubik", sans-serif;
+  transition: var(--transition);
+  box-shadow: 0 4px 10px rgba(0, 119, 182, 0.2);
 }
 
 button:hover {
-  background-color: #005fa3;
+  transform: translateY(-2px); /* כפתור עולה למעלה */
+  box-shadow: 0 6px 15px rgba(0, 119, 182, 0.3);
+  filter: brightness(1.1);
 }
 
-/* טפסים */
-input {
+/* 8. טפסים (Inputs) */
+input,
+textarea,
+select {
   display: block;
   width: 100%;
-  padding: 0.5rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 1.2rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   font-size: 1rem;
+  background-color: #fcfcfc;
+  transition: var(--transition);
+  font-family: "Rubik", sans-serif;
+}
+
+/* כשאנחנו בתוך השדה (Focus) */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 4px rgba(72, 202, 228, 0.15); /* הילה כחולה עדינה */
+  background-color: #fff;
+}
+
+/* 9. עיצוב פס גלילה (Scrollbar) */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+/* 10. רספונסיביות (למובייל) */
+@media (max-width: 768px) {
+  .main-content {
+    margin-right: 0; /* במובייל מבטלים את המרווח של התפריט צד */
+    padding: 15px;
+  }
+
+  .container {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
 }
