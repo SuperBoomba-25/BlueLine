@@ -135,6 +135,26 @@
     animation: fadeIn 0.3s;
   }
 }
+.logout-btn-menu {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  text-align: right;
+  font-size: 1rem;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logout-btn-menu:hover {
+  background: #ff5252;
+  border-color: #ff5252;
+}
 
 @keyframes fadeIn {
   from {

@@ -1,11 +1,31 @@
 const express = require("express");
 const router = express.Router();
 const Trip = require("../models/Trips");
-
 const { protect } = require("../middleware/authMiddleware");
 
-// GET – כל הטיולים
+// ------------------
+// GET – סטטיסטיקות לגרפים
+// ------------------
+router.get("/stats", async (req, res) => {
+  try {
+    const trips = await Trip.find({}, "destination participants");
 
+    const stats = trips.map((trip) => ({
+      // תיקון קריטי: אם אין destination, נכתוב "יעד לא ידוע" במקום לקרוס
+      name: trip.destination || "יעד לא ידוע",
+      count: trip.participants ? trip.participants.length : 0,
+    }));
+
+    res.json(stats);
+  } catch (err) {
+    console.error("Error fetching trip stats:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ------------------
+// GET – כל הטיולים
+// ------------------
 router.get("/", async (req, res) => {
   try {
     const trips = await Trip.find();
@@ -16,13 +36,53 @@ router.get("/", async (req, res) => {
 });
 
 // ------------------
+// POST – יצירת טיול חדש (למנהל)
+// ------------------
+router.post("/", protect, async (req, res) => {
+  try {
+    const { destination, date, price, description, image, maxParticipants } =
+      req.body;
+
+    // יצירת הטיול
+    const newTrip = new Trip({
+      destination,
+      date,
+      price,
+      description,
+      image,
+      maxParticipants,
+      participants: [],
+    });
+
+    const savedTrip = await newTrip.save();
+    res.status(201).json(savedTrip);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ------------------
+// DELETE – מחיקת טיול (למנהל)
+// ------------------
+router.delete("/:id", protect, async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+
+    await Trip.deleteOne({ _id: req.params.id });
+    res.json({ message: "Trip deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ------------------
 // GET – טיול לפי ID
 // ------------------
 router.get("/:id", async (req, res) => {
   try {
     const trip = await Trip.findById(req.params.id);
     if (!trip) return res.status(404).json({ message: "Trip not found" });
-
     res.json(trip);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -30,26 +90,20 @@ router.get("/:id", async (req, res) => {
 });
 
 // ------------------
-// POST – הרשמה לטיול (מעודכן עם בריאות ותשלום)
+// POST – הרשמה לטיול
 // ------------------
 router.post("/:id/enroll", protect, async (req, res) => {
   try {
-    // קבלת המידע מהמשתמש המחובר
     const userId = req.user._id;
-
-    // קבלת המידע החדש מהטופס (בריאות ותשלום)
     const { healthData, paymentData } = req.body;
 
     const trip = await Trip.findById(req.params.id);
-
     if (!trip) return res.status(404).json({ message: "Trip not found" });
 
-    // אם הטיול מלא
     if (trip.participants.length >= trip.maxParticipants) {
       return res.status(400).json({ message: "הטיול מלא ואין מקומות פנויים" });
     }
 
-    // אם המשתמש כבר רשום
     const already = trip.participants.some(
       (p) => p.userId.toString() === userId.toString()
     );
@@ -57,7 +111,6 @@ router.post("/:id/enroll", protect, async (req, res) => {
       return res.status(400).json({ message: "אתה כבר רשום לטיול הזה" });
     }
 
-    // יצירת אובייקט המשתתף החדש
     const newParticipant = {
       userId: userId,
       healthDeclaration: {
@@ -72,16 +125,13 @@ router.post("/:id/enroll", protect, async (req, res) => {
       },
     };
 
-    // הוספת המשתמש ושמירה
     trip.participants.push(newParticipant);
 
-    // אם יש פונקציה לבדיקת מלאות במודל
     if (typeof trip.checkIfFull === "function") {
       trip.checkIfFull();
     }
 
     await trip.save();
-
     res.json({ message: "נרשמת לטיול בהצלחה!", trip });
   } catch (err) {
     console.error(err);
@@ -90,16 +140,14 @@ router.post("/:id/enroll", protect, async (req, res) => {
 });
 
 // ------------------
-// GET – בדיקת סטטוס מלא/פנוי
+// GET – סטטוס הרשמה
 // ------------------
 router.get("/:id/status", async (req, res) => {
   try {
     const trip = await Trip.findById(req.params.id);
-
     if (!trip) return res.status(404).json({ message: "Trip not found" });
 
     const isFull = trip.participants.length >= trip.maxParticipants;
-
     res.json({
       isFull,
       participants: trip.participants.length,

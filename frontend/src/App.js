@@ -1,4 +1,6 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -7,62 +9,52 @@ import CoursesPage from "./pages/CoursesPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import TripsPage from "./pages/TripsPage";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Header from "./components/Header";
-import AdminPanel from "./components/AdminPanel";
 import BlogDiscussionPage from "./pages/BlogDiscussionPage";
 import CreateThreadPage from "./pages/CreateThreadPage";
+import AdminPage from "./pages/AdminPage"; // ✅ תיקון: ייבוא הדף החדש שיצרנו
+
+// ייבוא רכיבים
+import ProtectedRoute from "./components/ProtectedRoute";
+import Sidebar from "./components/Sidebar"; // ✅ תיקון: שימוש בסיידבר החדש
+
+// עיצוב
 import "./App.css";
 
 function App() {
   return (
     <Router>
       <div className="app-container">
-        <Header />
-        <main className="main-content">
+        {/* התפריט הצדדי הקבוע */}
+        <Sidebar />
+
+        {/* אזור התוכן המרכזי */}
+        <div className="main-content">
           <Routes>
+            {/* נתיבים פתוחים לכולם */}
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/courses" element={<CoursesPage />} />
-            <Route path="/blog" element={<BlogPage />} />
             <Route path="/trips" element={<TripsPage />} />
-            <Route path="/blog/:postId" element={<BlogPostPage />} />
-            <Route path="/blog" element={<BlogPage />} />
-            <Route path="/discussion/new" element={<CreateThreadPage />} />
-            {/* ✅ נתיב חדש: עמוד יצירת אשכול - מוגן למשתמשים רשומים בלבד */}
-            <Route
-              path="/discussion/new"
-              element={
-                <ProtectedRoute>
-                  {/* דף זמני ליצירת אשכול חדש */}
-                  <div
-                    style={{
-                      padding: "20px",
-                      textAlign: "center",
-                      backgroundColor: "#f9f9f9",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    <h1>דף יצירת אשכול חדש</h1>
-                    <p>כאן יופיע בהמשך טופס ליצירת נושא דיון חדש.</p>
-                  </div>
-                </ProtectedRoute>
-              }
-            />
 
+            {/* בלוג ופוסטים */}
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:postId" element={<BlogPostPage />} />
             <Route
               path="/blog/discussion/:postId"
               element={<BlogDiscussionPage />}
             />
+
+            {/* נתיבים מוגנים (דורשים התחברות) */}
             <Route
-              path="/admin"
+              path="/discussion/new"
               element={
                 <ProtectedRoute>
-                  <AdminPanel />
+                  <CreateThreadPage />
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/profile"
               element={
@@ -71,8 +63,18 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* ✅ נתיב לדף האדמין החדש */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminPage />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
-        </main>
+        </div>
       </div>
     </Router>
   );
