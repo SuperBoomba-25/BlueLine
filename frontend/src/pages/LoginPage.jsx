@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom"; // הוספתי Link שיהיה נוח
 import api from "../api";
-import "./LoginPage.css"; // (אופציונלי - אם יש לך קובץ עיצוב)
 
 function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
