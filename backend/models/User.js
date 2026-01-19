@@ -1,13 +1,19 @@
-// backend/models/User.js
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs"); // המלצה: עדיף bcryptjs למניעת בעיות תאימות, אבל גם bcrypt זה בסדר
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ["user", "admin"], default: "user" },
-  isBanned: { type: Boolean, default: false },
+
+  // ✅ כאן השינוי החשוב: הוספנו את "employee"
+  role: {
+    type: String,
+    enum: ["user", "employee", "admin"],
+    default: "user",
+  },
+
+  isBanned: { type: Boolean, default: false }, // שדה לחסימת משתמשים (טוב לאדמין)
   lastLogin: { type: Date },
   createdAt: { type: Date, default: Date.now },
 });

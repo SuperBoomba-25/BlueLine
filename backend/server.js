@@ -3,6 +3,7 @@ const http = require("http");
 const dotenv = require("dotenv");
 dotenv.config({ path: "./.env" });
 
+const blogRoutes = require("./routes/blogRoutes");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -52,6 +53,7 @@ app.use(xss());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(morgan("combined"));
 // 🟢 Routes
+app.use("/api/blog", blogRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api", authRoutes);

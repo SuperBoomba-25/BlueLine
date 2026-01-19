@@ -11,11 +11,11 @@ import BlogPostPage from "./pages/BlogPostPage";
 import TripsPage from "./pages/TripsPage";
 import BlogDiscussionPage from "./pages/BlogDiscussionPage";
 import CreateThreadPage from "./pages/CreateThreadPage";
-import AdminPage from "./pages/AdminPage"; // ✅ תיקון: ייבוא הדף החדש שיצרנו
+import AdminPage from "./pages/AdminPage";
 
 // ייבוא רכיבים
 import ProtectedRoute from "./components/ProtectedRoute";
-import Sidebar from "./components/Sidebar"; // ✅ תיקון: שימוש בסיידבר החדש
+import Sidebar from "./components/Sidebar";
 
 // עיצוב
 import "./App.css";
@@ -45,7 +45,7 @@ function App() {
               element={<BlogDiscussionPage />}
             />
 
-            {/* נתיבים מוגנים (דורשים התחברות) */}
+            {/* נתיבים מוגנים (דורשים התחברות בלבד) */}
             <Route
               path="/discussion/new"
               element={
@@ -64,11 +64,12 @@ function App() {
               }
             />
 
-            {/* ✅ נתיב לדף האדמין החדש */}
+            {/* ✅ נתיב לדף האדמין - מוגן למנהלים ועובדים בלבד! */}
+            {/* הוספנו כאן את adminOnly={true} */}
             <Route
               path="/admin"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly={true}>
                   <AdminPage />
                 </ProtectedRoute>
               }
