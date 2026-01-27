@@ -1,19 +1,19 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs"); // המלצה: עדיף bcryptjs למניעת בעיות תאימות, אבל גם bcrypt זה בסדר
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
 
-  // ✅ כאן השינוי החשוב: הוספנו את "employee"
+  // תפקידים: משתמש רגיל, עובד, מנהל
   role: {
     type: String,
     enum: ["user", "employee", "admin"],
     default: "user",
   },
 
-  isBanned: { type: Boolean, default: false }, // שדה לחסימת משתמשים (טוב לאדמין)
+  isBanned: { type: Boolean, default: false },
   lastLogin: { type: Date },
   createdAt: { type: Date, default: Date.now },
 });
@@ -26,9 +26,9 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// השוואת סיסמה
+// פונקציה להשוואת סיסמה (עבור הלוגין)
 userSchema.methods.matchPassword = async function (enteredPassword) {
-  return bcrypt.compare(enteredPassword, this.password);
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
 const User = mongoose.model("User", userSchema);

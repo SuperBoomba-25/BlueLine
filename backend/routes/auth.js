@@ -1,11 +1,10 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const axios = require("axios");
 const User = require("../models/User");
 
 const router = express.Router();
 
-// ******** REGISTER ********
+// ******** REGISTER (הרשמה) ********
 router.post("/register", async (req, res) => {
   const { name, email, password, role } = req.body;
 
@@ -19,13 +18,21 @@ router.post("/register", async (req, res) => {
       name,
       email,
       password,
-      role: role || "user",
+      role: role || "user", // ברירת מחדל: משתמש רגיל
     });
 
     await newUser.save();
 
+    // יצירת טוקן מיד לאחר ההרשמה
+    const token = jwt.sign(
+      { id: newUser._id, role: newUser.role, name: newUser.name },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
     res.status(201).json({
       message: "משתמש נרשם בהצלחה",
+      token, // שולחים טוקן כדי שהמשתמש יתחבר מיד
       user: {
         _id: newUser._id,
         name: newUser.name,
@@ -39,7 +46,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// ******** LOGIN ********
+// ******** LOGIN (התחברות) ********
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -54,10 +61,11 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "סיסמה שגויה" });
     }
 
+    // יצירת טוקן
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: user._id, role: user.role, name: user.name },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "30d" } // שיניתי ל-30 יום כדי שלא יתנתק מהר מדי
     );
 
     res.json({
