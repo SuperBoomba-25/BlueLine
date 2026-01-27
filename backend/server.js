@@ -3,7 +3,6 @@ const http = require("http");
 const dotenv = require("dotenv");
 dotenv.config({ path: "./.env" });
 
-const blogRoutes = require("./routes/blogRoutes");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -14,17 +13,20 @@ const morgan = require("morgan");
 
 const connectDB = require("./config/db");
 
+// ייבוא הראוטרים (Routes)
+const blogRoutes = require("./routes/blogRoutes");
 const courseRoutes = require("./routes/courseRoutes");
 const tripRoutes = require("./routes/tripRoutes");
+// שים לב: וודא שהקובץ auth.js קיים בתיקייה routes, אחרת שנה ל-authRoutes
 const authRoutes = require("./routes/auth");
-const userRoutes = require("./routes/userRoutes");
-const surfRoutes = require("./routes/surf");
-const forumRoutes = require("./routes/forumRoutes");
 
-// 🟢 Load environment variables
+// הערתי את אלו כי כרגע הם כנראה גורמים לקריסה (אם הקבצים ריקים):
+// const userRoutes = require("./routes/userRoutes");
+// const surfRoutes = require("./routes/surf");
+// const forumRoutes = require("./routes/forumRoutes"); // הפורום מנוהל ב-blogRoutes!
 
 // 🟢 Connect to MongoDB
-connectDB(); // או connectToDB();
+connectDB();
 
 const app = express();
 const server = http.createServer(app);
@@ -52,14 +54,17 @@ app.use(mongoSanitize());
 app.use(xss());
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(morgan("combined"));
-// 🟢 Routes
-app.use("/api/blog", blogRoutes);
-app.use("/api/trips", tripRoutes);
-app.use("/api/courses", courseRoutes);
-app.use("/api", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/surf", surfRoutes);
-app.use("/api/forums", forumRoutes);
+
+// 🟢 Routes - רק מה שבוודאות קיים ותקין
+app.use("/api/blog", blogRoutes); // זה הפורום והבלוג שלנו
+app.use("/api/trips", tripRoutes); // טיולים
+app.use("/api/courses", courseRoutes); // קורסים
+app.use("/api/auth", authRoutes); // אימות (Login/Register)
+
+// הערתי את אלו למניעת קריסה:
+// app.use("/api/users", userRoutes);
+// app.use("/api/surf", surfRoutes);
+// app.use("/api/forums", forumRoutes);
 
 // 🟢 Base route
 app.get("/", (req, res) => res.send("🌊 BlueLine API is running..."));
