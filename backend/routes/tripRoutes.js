@@ -7,7 +7,7 @@ const { protect } = require("../middleware/authMiddleware");
 // GET – סטטיסטיקות לגרפים
 // ------------------
 router.get("/stats", async (req, res) => {
-  try {
+  try {ד
     const trips = await Trip.find({}, "destination participants");
 
     const stats = trips.map((trip) => ({
@@ -60,19 +60,17 @@ router.post("/", protect, async (req, res) => {
 });
 
 // ------------------
-// PUT – עריכת טיול (חדש!) ✅
+// PUT – עריכת טיול (✅ התיקון החשוב)
 // ------------------
 router.put("/:id", protect, async (req, res) => {
   try {
-    const updatedTrip = await Trip.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true } // מחזיר את האובייקט המעודכן
-    );
+    const updatedTrip = await Trip.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updatedTrip)
       return res.status(404).json({ message: "Trip not found" });
-
     res.json(updatedTrip);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -175,3 +173,6 @@ router.get("/:id/status", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// שורה קריטית - אל תמחק!
+module.exports = router;
