@@ -7,7 +7,7 @@ const { protect } = require("../middleware/authMiddleware");
 // GET – סטטיסטיקות לגרפים
 // ------------------
 router.get("/stats", async (req, res) => {
-  try {ד
+  try {
     const trips = await Trip.find({}, "destination participants");
 
     const stats = trips.map((trip) => ({

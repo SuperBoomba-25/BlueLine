@@ -14,6 +14,7 @@ router.get("/", async (req, res) => {
     const posts = await BlogPost.find(query).sort({ createdAt: -1 });
     res.json(posts);
   } catch (err) {
+    console.error("Error fetching posts:", err);
     res.status(500).json({ message: err.message });
   }
 });
@@ -52,25 +53,21 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
-// ----------------------------------------------------
-// PUT - אישור פוסט (התיקון החזק) 💪
-// ----------------------------------------------------
+// PUT - אישור פוסט
 router.put("/:id/approve", protect, async (req, res) => {
   try {
     if (req.user.role !== "admin" && req.user.role !== "employee") {
       return res.status(401).json({ message: "Not authorized" });
     }
 
-    // שימוש ב-findByIdAndUpdate מבטיח שהשדה יתעדכן בבסיס הנתונים
     const updatedPost = await BlogPost.findByIdAndUpdate(
       req.params.id,
       { isApproved: true },
-      { new: true } // מחזיר את התוצאה המעודכנת
+      { new: true }
     );
 
     if (!updatedPost)
       return res.status(404).json({ message: "Post not found" });
-
     res.json(updatedPost);
   } catch (err) {
     res.status(500).json({ message: err.message });
