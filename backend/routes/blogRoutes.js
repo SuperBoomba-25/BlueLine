@@ -1,7 +1,19 @@
 const express = require("express");
 const router = express.Router();
-const BlogPost = require("../models/BlogPost");
+const BlogPost = require("../models/BlogPost"); // וודא שזה תואם לשם הקובץ!
 const { protect } = require("../middleware/authMiddleware");
+
+// --- 🔍 בדיקת דיאגנוסטיקה ---
+console.log("------------------------------------------------");
+console.log("🔍 CHECKING BLOGPOST MODEL:");
+if (BlogPost && BlogPost.find) {
+  console.log("✅ BlogPost model loaded successfully!");
+} else {
+  console.error("❌ CRITICAL ERROR: BlogPost model is NOT loaded correctly.");
+  console.error("Value of BlogPost:", BlogPost);
+}
+console.log("------------------------------------------------");
+// -----------------------------
 
 // GET - קבלת פוסטים
 router.get("/", async (req, res) => {
