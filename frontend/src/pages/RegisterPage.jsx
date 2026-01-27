@@ -40,7 +40,8 @@ function RegisterPage() {
     try {
       setLoading(true);
 
-      await api.post("/register", {
+      // ✅ התיקון: הוספנו /auth להתחלה
+      await api.post("/auth/register", {
         name: form.name,
         email: form.email,
         password: form.password,

@@ -21,19 +21,18 @@ function AdminPage() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [managementView, setManagementView] = useState("menu");
 
-  // נתונים
   const [tripsData, setTripsData] = useState([]);
   const [coursesData, setCoursesData] = useState([]);
+
   const [allTrips, setAllTrips] = useState([]);
   const [allCourses, setAllCourses] = useState([]);
-  const [allPosts, setAllPosts] = useState([]);
+  const [allPosts, setAllPosts] = useState([]); // כאן יישמרו הפוסטים
+
   const [loading, setLoading] = useState(true);
 
-  // מודלים (Popups)
+  // מודלים
   const [showTripModal, setShowTripModal] = useState(false);
   const [showCourseModal, setShowCourseModal] = useState(false);
-
-  // מצב עריכה (אם יש ID - עורכים, אם אין - יוצרים חדש)
   const [editingId, setEditingId] = useState(null);
 
   // טפסים
@@ -54,10 +53,11 @@ function AdminPage() {
     maxParticipants: 30,
   });
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const userString = localStorage.getItem("user");
+  const user = userString ? JSON.parse(userString) : null;
   const isEmployee = user?.role === "employee";
 
-  // --- טעינה ראשונית (סטטיסטיקות) ---
+  // --- טעינה ראשונית ---
   useEffect(() => {
     if (isEmployee) {
       setLoading(false);
@@ -81,21 +81,26 @@ function AdminPage() {
     fetchStats();
   }, [isEmployee]);
 
-  // ==========================================
-  // לוגיקה לניהול טיולים (הוספה + עריכה)
-  // ==========================================
-
+  // --- פונקציות ניהול טיולים וקורסים ---
   const fetchAllTrips = async () => {
     try {
       const res = await api.get("/trips");
       setAllTrips(res.data);
       setManagementView("trips");
     } catch (err) {
-      alert("שגיאה בטעינת הטיולים");
+      alert("שגיאה");
     }
   };
-
-  // פתיחת מודל לעריכה (ממלא את הטופס בפרטים קיימים)
+  const handleDeleteTrip = async (id) => {
+    if (window.confirm("למחוק?")) {
+      try {
+        await api.delete(`/trips/${id}`);
+        setAllTrips(allTrips.filter((t) => t._id !== id));
+      } catch (err) {
+        alert("שגיאה");
+      }
+    }
+  };
   const openEditTrip = (trip) => {
     setEditingId(trip._id);
     setNewTrip({
@@ -108,8 +113,6 @@ function AdminPage() {
     });
     setShowTripModal(true);
   };
-
-  // פתיחת מודל ליצירה חדשה (מאפס את הטופס)
   const openNewTrip = () => {
     setEditingId(null);
     setNewTrip({
@@ -122,41 +125,21 @@ function AdminPage() {
     });
     setShowTripModal(true);
   };
-
   const handleSaveTrip = async (e) => {
     e.preventDefault();
     try {
       if (editingId) {
-        // === עדכון (PUT) ===
         const res = await api.put(`/trips/${editingId}`, newTrip);
         setAllTrips(allTrips.map((t) => (t._id === editingId ? res.data : t)));
-        alert("הטיול עודכן בהצלחה! ✅");
       } else {
-        // === יצירה (POST) ===
         const res = await api.post("/trips", newTrip);
         setAllTrips([...allTrips, res.data]);
-        alert("הטיול נוצר בהצלחה! 🎉");
       }
       setShowTripModal(false);
     } catch (err) {
-      alert("שגיאה: " + err.message);
+      alert(err.message);
     }
   };
-
-  const handleDeleteTrip = async (id) => {
-    if (window.confirm("האם למחוק את הטיול?")) {
-      try {
-        await api.delete(`/trips/${id}`);
-        setAllTrips(allTrips.filter((t) => t._id !== id));
-      } catch (err) {
-        alert("שגיאה במחיקה");
-      }
-    }
-  };
-
-  // ==========================================
-  // לוגיקה לניהול קורסים (הוספה + עריכה)
-  // ==========================================
 
   const fetchAllCourses = async () => {
     try {
@@ -164,10 +147,19 @@ function AdminPage() {
       setAllCourses(res.data);
       setManagementView("courses");
     } catch (err) {
-      alert("שגיאה בטעינת הקורסים");
+      alert("שגיאה");
     }
   };
-
+  const handleDeleteCourse = async (id) => {
+    if (window.confirm("למחוק?")) {
+      try {
+        await api.delete(`/courses/${id}`);
+        setAllCourses(allCourses.filter((c) => c._id !== id));
+      } catch (err) {
+        alert("שגיאה");
+      }
+    }
+  };
   const openEditCourse = (course) => {
     setEditingId(course._id);
     setNewCourse({
@@ -180,7 +172,6 @@ function AdminPage() {
     });
     setShowCourseModal(true);
   };
-
   const openNewCourse = () => {
     setEditingId(null);
     setNewCourse({
@@ -193,7 +184,6 @@ function AdminPage() {
     });
     setShowCourseModal(true);
   };
-
   const handleSaveCourse = async (e) => {
     e.preventDefault();
     try {
@@ -202,41 +192,39 @@ function AdminPage() {
         setAllCourses(
           allCourses.map((c) => (c._id === editingId ? res.data : c))
         );
-        alert("הקורס עודכן בהצלחה! ✅");
       } else {
         const res = await api.post("/courses", newCourse);
         setAllCourses([...allCourses, res.data]);
-        alert("הקורס נוצר בהצלחה! 🎉");
       }
       setShowCourseModal(false);
     } catch (err) {
-      alert("שגיאה: " + err.message);
+      alert(err.message);
     }
   };
 
-  const handleDeleteCourse = async (id) => {
-    if (window.confirm("האם למחוק את הקורס?")) {
-      try {
-        await api.delete(`/courses/${id}`);
-        setAllCourses(allCourses.filter((c) => c._id !== id));
-      } catch (err) {
-        alert("שגיאה במחיקה");
-      }
-    }
-  };
-
-  // ==========================================
-  // ניהול פורום
-  // ==========================================
+  // --- ✅ ניהול פורום (החלק שתוקן) ---
   const fetchAllPosts = async () => {
     try {
-      const res = await api.get("/blog");
+      // כאן היה החסר: הוספנו ?all=true כדי להביא גם פוסטים לא מאושרים
+      const res = await api.get("/blog?all=true");
       setAllPosts(res.data);
       setManagementView("blog");
     } catch (err) {
       alert("שגיאה בטעינת הפוסטים");
     }
   };
+
+  const handleApprovePost = async (id) => {
+    try {
+      const res = await api.put(`/blog/${id}/approve`);
+      // עדכון הטבלה המקומית
+      setAllPosts(allPosts.map((p) => (p._id === id ? res.data : p)));
+      alert("הפוסט אושר בהצלחה! ✅");
+    } catch (err) {
+      alert("שגיאה באישור הפוסט");
+    }
+  };
+
   const handleDeletePost = async (id) => {
     if (window.confirm("האם למחוק את הפוסט?")) {
       try {
@@ -251,7 +239,7 @@ function AdminPage() {
   if (loading)
     return (
       <div className="admin-container">
-        <p className="loading-text">טוען...</p>
+        <p>טוען נתונים...</p>
       </div>
     );
 
@@ -282,91 +270,68 @@ function AdminPage() {
       </div>
 
       <div className="tab-content">
-        {/* === דשבורד === */}
+        {/* דשבורד */}
         {!isEmployee && activeTab === "dashboard" && (
           <div className="charts-grid">
             <div className="chart-card">
-              <h3>🏄‍♂️ נרשמים לטיולים</h3>
-              {tripsData.length > 0 ? (
-                <div style={{ width: "100%", height: 300 }}>
-                  <ResponsiveContainer>
-                    <BarChart data={tripsData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis allowDecimals={false} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar
-                        dataKey="count"
-                        name="נרשמים"
-                        fill="var(--primary-color)"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <p className="no-data">אין נתונים להצגה</p>
-              )}
+              <h3>נרשמים</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={tripsData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="count" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
             <div className="chart-card">
-              <h3>🎓 התפלגות קורסים</h3>
-              {coursesData.length > 0 ? (
-                <div style={{ width: "100%", height: 300 }}>
-                  <ResponsiveContainer>
-                    <PieChart>
-                      <Pie
-                        data={coursesData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) =>
-                          `${name} ${(percent * 100).toFixed(0)}%`
-                        }
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="count"
-                      >
-                        {coursesData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <p className="no-data">אין נתונים להצגה</p>
-              )}
+              <h3>קורסים</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={coursesData}
+                    dataKey="count"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label
+                  >
+                    {coursesData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </div>
         )}
 
-        {/* === ניהול תוכן === */}
+        {/* ניהול תוכן */}
         {activeTab === "management" && (
           <>
             {managementView === "menu" && (
               <div className="management-grid">
                 <div className="manage-card">
                   <h2>🏄‍♂️ ניהול טיולים</h2>
-                  <p>הוספה, עריכה ומחיקה של טיולים.</p>
                   <button className="action-btn" onClick={fetchAllTrips}>
                     כניסה
                   </button>
                 </div>
                 <div className="manage-card">
                   <h2>🎓 ניהול קורסים</h2>
-                  <p>הוספה, עריכה ומחיקה של קורסים.</p>
                   <button className="action-btn" onClick={fetchAllCourses}>
                     כניסה
                   </button>
                 </div>
                 <div className="manage-card">
                   <h2>💬 ניהול פורום</h2>
-                  <p>מחיקת פוסטים ודיונים.</p>
+                  <p>אישור ומחיקת פוסטים</p>
                   <button className="action-btn" onClick={fetchAllPosts}>
                     כניסה
                   </button>
@@ -374,7 +339,7 @@ function AdminPage() {
               </div>
             )}
 
-            {/* טבלת טיולים - עם עריכה */}
+            {/* טבלאות טיולים וקורסים */}
             {managementView === "trips" && (
               <div className="table-container">
                 <div className="table-header">
@@ -384,9 +349,9 @@ function AdminPage() {
                   >
                     ➡️ חזור
                   </button>
-                  <h2>רשימת הטיולים</h2>
+                  <h2>ניהול טיולים</h2>
                   <button className="add-btn" onClick={openNewTrip}>
-                    + הוסף טיול
+                    + חדש
                   </button>
                 </div>
                 <table className="management-table">
@@ -403,20 +368,19 @@ function AdminPage() {
                       <tr key={t._id}>
                         <td>{t.destination}</td>
                         <td>{new Date(t.date).toLocaleDateString()}</td>
-                        <td>₪{t.price}</td>
+                        <td>{t.price}</td>
                         <td>
                           <button
                             className="edit-btn-small"
                             onClick={() => openEditTrip(t)}
-                            style={{ marginLeft: "10px", cursor: "pointer" }}
                           >
-                            ✏️ ערוך
+                            ✏️
                           </button>
                           <button
                             className="delete-btn-small"
                             onClick={() => handleDeleteTrip(t._id)}
                           >
-                            🗑️ מחק
+                            🗑️
                           </button>
                         </td>
                       </tr>
@@ -425,8 +389,6 @@ function AdminPage() {
                 </table>
               </div>
             )}
-
-            {/* טבלת קורסים - עם עריכה */}
             {managementView === "courses" && (
               <div className="table-container">
                 <div className="table-header">
@@ -436,9 +398,9 @@ function AdminPage() {
                   >
                     ➡️ חזור
                   </button>
-                  <h2>רשימת הקורסים</h2>
+                  <h2>ניהול קורסים</h2>
                   <button className="add-btn" onClick={openNewCourse}>
-                    + הוסף קורס
+                    + חדש
                   </button>
                 </div>
                 <table className="management-table">
@@ -455,20 +417,19 @@ function AdminPage() {
                       <tr key={c._id}>
                         <td>{c.title}</td>
                         <td>{new Date(c.startDate).toLocaleDateString()}</td>
-                        <td>₪{c.price}</td>
+                        <td>{c.price}</td>
                         <td>
                           <button
                             className="edit-btn-small"
                             onClick={() => openEditCourse(c)}
-                            style={{ marginLeft: "10px", cursor: "pointer" }}
                           >
-                            ✏️ ערוך
+                            ✏️
                           </button>
                           <button
                             className="delete-btn-small"
                             onClick={() => handleDeleteCourse(c._id)}
                           >
-                            🗑️ מחק
+                            🗑️
                           </button>
                         </td>
                       </tr>
@@ -478,7 +439,7 @@ function AdminPage() {
               </div>
             )}
 
-            {/* טבלת בלוג */}
+            {/* ✅ טבלת הפורום המתוקנת ✅ */}
             {managementView === "blog" && (
               <div className="table-container">
                 <div className="table-header">
@@ -490,141 +451,157 @@ function AdminPage() {
                   </button>
                   <h2>ניהול פורום</h2>
                 </div>
-                <table className="management-table">
-                  <thead>
-                    <tr>
-                      <th>כותרת</th>
-                      <th>מאת</th>
-                      <th>פעולות</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {allPosts.map((p) => (
-                      <tr key={p._id}>
-                        <td>{p.title}</td>
-                        <td>{p.authorName}</td>
-                        <td>
-                          <button
-                            className="delete-btn-small"
-                            onClick={() => handleDeletePost(p._id)}
-                          >
-                            🗑️ מחק
-                          </button>
-                        </td>
+
+                {allPosts.length === 0 ? (
+                  <p style={{ textAlign: "center", padding: "20px" }}>
+                    אין פוסטים להצגה
+                  </p>
+                ) : (
+                  <table className="management-table">
+                    <thead>
+                      <tr>
+                        <th>כותרת</th>
+                        <th>מאת</th>
+                        <th>סטטוס</th> {/* העמודה שהייתה חסרה לך */}
+                        <th>פעולות</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {allPosts.map((p) => (
+                        <tr key={p._id}>
+                          <td>{p.title}</td>
+                          <td>{p.authorName}</td>
+                          <td>
+                            {p.isApproved ? (
+                              <span
+                                style={{ color: "green", fontWeight: "bold" }}
+                              >
+                                פורסם ✅
+                              </span>
+                            ) : (
+                              <span
+                                style={{ color: "orange", fontWeight: "bold" }}
+                              >
+                                ממתין לאישור ⏳
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            {!p.isApproved && (
+                              <button
+                                onClick={() => handleApprovePost(p._id)}
+                                style={{
+                                  backgroundColor: "#28a745",
+                                  color: "white",
+                                  border: "none",
+                                  padding: "5px 10px",
+                                  borderRadius: "5px",
+                                  cursor: "pointer",
+                                  marginLeft: "10px",
+                                }}
+                              >
+                                ✅ אשר
+                              </button>
+                            )}
+                            <button
+                              className="delete-btn-small"
+                              onClick={() => handleDeletePost(p._id)}
+                            >
+                              🗑️ מחק
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             )}
           </>
         )}
       </div>
 
-      {/* מודל טיול (משותף ליצירה ועריכה) */}
+      {/* מודלים לטיולים וקורסים... */}
       {showTripModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>{editingId ? "✏️ עריכת טיול" : "✈️ הוספת טיול חדש"}</h3>
             <form onSubmit={handleSaveTrip}>
               <input
-                placeholder="יעד"
-                required
                 value={newTrip.destination}
                 onChange={(e) =>
                   setNewTrip({ ...newTrip, destination: e.target.value })
                 }
+                placeholder="יעד"
               />
               <input
                 type="date"
-                required
                 value={newTrip.date}
                 onChange={(e) =>
                   setNewTrip({ ...newTrip, date: e.target.value })
                 }
               />
               <input
-                type="number"
-                placeholder="מחיר"
-                required
                 value={newTrip.price}
                 onChange={(e) =>
                   setNewTrip({ ...newTrip, price: e.target.value })
                 }
+                placeholder="מחיר"
               />
               <input
-                type="number"
-                placeholder="משתתפים"
                 value={newTrip.maxParticipants}
                 onChange={(e) =>
                   setNewTrip({ ...newTrip, maxParticipants: e.target.value })
                 }
+                placeholder="משתתפים"
               />
               <input
-                placeholder="תמונה URL"
                 value={newTrip.image}
                 onChange={(e) =>
                   setNewTrip({ ...newTrip, image: e.target.value })
                 }
+                placeholder="תמונה"
               />
               <textarea
-                placeholder="תיאור"
                 value={newTrip.description}
                 onChange={(e) =>
                   setNewTrip({ ...newTrip, description: e.target.value })
                 }
+                placeholder="תיאור"
               />
-              <div className="modal-buttons">
-                <button type="submit" className="save-btn">
-                  {editingId ? "עדכן" : "שמור"}
-                </button>
-                <button
-                  type="button"
-                  className="cancel-btn"
-                  onClick={() => setShowTripModal(false)}
-                >
-                  ביטול
-                </button>
-              </div>
+              <button type="submit">שמור</button>
+              <button type="button" onClick={() => setShowTripModal(false)}>
+                ביטול
+              </button>
             </form>
           </div>
         </div>
       )}
-
-      {/* מודל קורס (משותף ליצירה ועריכה) */}
       {showCourseModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>{editingId ? "✏️ עריכת קורס" : "🎓 הוספת קורס חדש"}</h3>
             <form onSubmit={handleSaveCourse}>
               <input
-                placeholder="שם הקורס"
-                required
                 value={newCourse.title}
                 onChange={(e) =>
                   setNewCourse({ ...newCourse, title: e.target.value })
                 }
+                placeholder="שם"
               />
               <input
                 type="date"
-                required
                 value={newCourse.startDate}
                 onChange={(e) =>
                   setNewCourse({ ...newCourse, startDate: e.target.value })
                 }
               />
               <input
-                type="number"
-                placeholder="מחיר"
-                required
                 value={newCourse.price}
                 onChange={(e) =>
                   setNewCourse({ ...newCourse, price: e.target.value })
                 }
+                placeholder="מחיר"
               />
               <input
-                type="number"
-                placeholder="משתתפים"
                 value={newCourse.maxParticipants}
                 onChange={(e) =>
                   setNewCourse({
@@ -632,33 +609,26 @@ function AdminPage() {
                     maxParticipants: e.target.value,
                   })
                 }
+                placeholder="משתתפים"
               />
               <input
-                placeholder="תמונה URL"
                 value={newCourse.image}
                 onChange={(e) =>
                   setNewCourse({ ...newCourse, image: e.target.value })
                 }
+                placeholder="תמונה"
               />
               <textarea
-                placeholder="תיאור"
                 value={newCourse.description}
                 onChange={(e) =>
                   setNewCourse({ ...newCourse, description: e.target.value })
                 }
+                placeholder="תיאור"
               />
-              <div className="modal-buttons">
-                <button type="submit" className="save-btn">
-                  {editingId ? "עדכן" : "שמור"}
-                </button>
-                <button
-                  type="button"
-                  className="cancel-btn"
-                  onClick={() => setShowCourseModal(false)}
-                >
-                  ביטול
-                </button>
-              </div>
+              <button type="submit">שמור</button>
+              <button type="button" onClick={() => setShowCourseModal(false)}>
+                ביטול
+              </button>
             </form>
           </div>
         </div>

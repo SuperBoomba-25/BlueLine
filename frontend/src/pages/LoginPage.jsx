@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom"; // הוספתי Link שיהיה נוח
+import { useNavigate, Link } from "react-router-dom";
 import api from "../api";
 
 function LoginPage() {
@@ -15,36 +15,35 @@ function LoginPage() {
     setError("");
 
     try {
-      // שים לב: וודא שהנתיב בשרת הוא אכן /login או /auth/login או /users/login
-      const res = await api.post("/login", {
+      // ✅ התיקון: הוספנו /auth להתחלה
+      const res = await api.post("/auth/login", {
         email: form.email,
         password: form.password,
       });
 
-      console.log("תשובת שרת בהתחברות:", res.data); // לוג לדיבאג
+      console.log("תשובת שרת בהתחברות:", res.data);
 
       // 1. שמירת הטוקן
       localStorage.setItem("token", res.data.token);
 
-      // 2. חילוץ פרטי המשתמש בצורה חכמה
-      // בדיקה: האם המידע נמצא בתוך res.data.user או שטוח ב-res.data?
+      // 2. חילוץ פרטי המשתמש
       const userData = res.data.user ? res.data.user : res.data;
 
-      // שמירה בלוקל סטורג' כדי שה-Sidebar וה-ProtectedRoute יכירו אותו
+      // שמירה בלוקל סטורג'
       localStorage.setItem("user", JSON.stringify(userData));
 
+      alert("התחברת בהצלחה! 👋");
+
       // 3. הפניה לפי תפקיד
-      if (userData.role === "admin") {
-        navigate("/admin");
-      } else if (userData.role === "employee") {
-        // אם תרצה דף מיוחד לעובדים בעתיד
+      if (userData.role === "admin" || userData.role === "employee") {
         navigate("/admin");
       } else {
         navigate("/");
       }
 
-      // רענון קטן כדי שה-Sidebar יתעדכן מיד (אופציונלי, תלוי איך ה-Sidebar בנוי)
+      // רענון כדי שהאתר יתעדכן
       window.dispatchEvent(new Event("storage"));
+      window.location.reload();
     } catch (err) {
       console.error("Login Error:", err);
       setError(err.response?.data?.message || "שגיאה בהתחברות, נסה שוב.");
