@@ -11,7 +11,6 @@ router.get("/stats", async (req, res) => {
     const trips = await Trip.find({}, "destination participants");
 
     const stats = trips.map((trip) => ({
-      // תיקון קריטי: אם אין destination, נכתוב "יעד לא ידוע" במקום לקרוס
       name: trip.destination || "יעד לא ידוע",
       count: trip.participants ? trip.participants.length : 0,
     }));
@@ -43,7 +42,6 @@ router.post("/", protect, async (req, res) => {
     const { destination, date, price, description, image, maxParticipants } =
       req.body;
 
-    // יצירת הטיול
     const newTrip = new Trip({
       destination,
       date,
@@ -56,6 +54,26 @@ router.post("/", protect, async (req, res) => {
 
     const savedTrip = await newTrip.save();
     res.status(201).json(savedTrip);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ------------------
+// PUT – עריכת טיול (חדש!) ✅
+// ------------------
+router.put("/:id", protect, async (req, res) => {
+  try {
+    const updatedTrip = await Trip.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true } // מחזיר את האובייקט המעודכן
+    );
+
+    if (!updatedTrip)
+      return res.status(404).json({ message: "Trip not found" });
+
+    res.json(updatedTrip);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -157,5 +175,3 @@ router.get("/:id/status", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-module.exports = router;

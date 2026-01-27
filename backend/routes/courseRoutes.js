@@ -3,20 +3,13 @@ const router = express.Router();
 const Course = require("../models/Course");
 const { protect } = require("../middleware/authMiddleware");
 
-// ------------------
-// GET – סטטיסטיקות לגרף עוגה (חדש!)
-// ⚠️ חשוב מאוד: חייב להופיע *לפני* הנתיב של /:id
-// ------------------
+// GET - סטטיסטיקות
 router.get("/stats", async (req, res) => {
   try {
-    // 1. שליפה חכמה: מביא רק את הכותרת והמשתתפים
-    // (הערה: אני מניח שלקורס יש שדה בשם 'title'. אם אצלך זה 'name', שנה כאן ל-'name')
     const courses = await Course.find({}, "title participants");
-
-    // 2. עיבוד הנתונים לפורמט שהגרף ב-AdminPage צריך
     const stats = courses.map((course) => ({
-      name: course.title, // שם הקורס (יופיע במקרא של הגרף)
-      count: course.participants.length, // גודל הפרוסה בעוגה
+      name: course.title,
+      count: course.participants ? course.participants.length : 0,
     }));
 
     res.json(stats);
@@ -36,6 +29,45 @@ router.get("/", async (req, res) => {
   }
 });
 
+// POST – יצירת קורס חדש (חדש!) ✅
+router.post("/", protect, async (req, res) => {
+  try {
+    // יוצר קורס חדש עם הנתונים שהתקבלו
+    const newCourse = new Course(req.body);
+    const savedCourse = await newCourse.save();
+    res.status(201).json(savedCourse);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT – עריכת קורס (חדש!) ✅
+router.put("/:id", protect, async (req, res) => {
+  try {
+    const updatedCourse = await Course.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!updatedCourse)
+      return res.status(404).json({ message: "Course not found" });
+    res.json(updatedCourse);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE – מחיקת קורס (חדש!) ✅
+router.delete("/:id", protect, async (req, res) => {
+  try {
+    const course = await Course.findByIdAndDelete(req.params.id);
+    if (!course) return res.status(404).json({ message: "Course not found" });
+    res.json({ message: "Course deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET – קורס לפי ID
 router.get("/:id", async (req, res) => {
   try {
@@ -50,20 +82,16 @@ router.get("/:id", async (req, res) => {
 // POST – הרשמה לקורס (כולל בריאות ותשלום)
 router.post("/:id/enroll", protect, async (req, res) => {
   try {
-    // זיהוי המשתמש
     const userId = req.user._id || req.user.id;
-
-    const { healthData, paymentData } = req.body; // קבלת הנתונים מהפרונט
+    const { healthData, paymentData } = req.body;
 
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ message: "Course not found" });
 
-    // בדיקה אם מלא
     if (course.participants.length >= course.maxParticipants) {
       return res.status(400).json({ message: "הקורס מלא" });
     }
 
-    // בדיקה אם המשתמש כבר רשום
     const isEnrolled = course.participants.some(
       (p) => p.userId.toString() === userId.toString()
     );
@@ -71,7 +99,6 @@ router.post("/:id/enroll", protect, async (req, res) => {
       return res.status(400).json({ message: "אתה כבר רשום לקורס זה" });
     }
 
-    // יצירת המשתתף החדש
     const newParticipant = {
       userId: userId,
       healthDeclaration: {

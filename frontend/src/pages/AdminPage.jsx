@@ -33,7 +33,10 @@ function AdminPage() {
   const [showTripModal, setShowTripModal] = useState(false);
   const [showCourseModal, setShowCourseModal] = useState(false);
 
-  // טפסים ליצירה חדשה
+  // מצב עריכה (אם יש ID - עורכים, אם אין - יוצרים חדש)
+  const [editingId, setEditingId] = useState(null);
+
+  // טפסים
   const [newTrip, setNewTrip] = useState({
     destination: "",
     date: "",
@@ -54,7 +57,7 @@ function AdminPage() {
   const user = JSON.parse(localStorage.getItem("user"));
   const isEmployee = user?.role === "employee";
 
-  // --- טעינה ראשונית ---
+  // --- טעינה ראשונית (סטטיסטיקות) ---
   useEffect(() => {
     if (isEmployee) {
       setLoading(false);
@@ -79,101 +82,9 @@ function AdminPage() {
   }, [isEmployee]);
 
   // ==========================================
-  // 🪄 פונקציית הקסם לשחזור נתונים (Seeding)
-  // ==========================================
-  const handleSeedData = async () => {
-    if (
-      !window.confirm(
-        "האם להוסיף נתונים לדוגמה (טיולים, קורסים ופוסטים) למסד הנתונים?"
-      )
-    )
-      return;
-
-    try {
-      // 1. נתונים לטיולים
-      const dummyTrips = [
-        {
-          destination: "המלדיביים",
-          date: "2025-11-15",
-          price: 5500,
-          description: "טיול גלישה חלומי באיים המלדיביים, כולל הדרכה וצילום.",
-          image:
-            "https://images.unsplash.com/photo-1537551080512-fb7dd14fbf90?auto=format&fit=crop&w=800&q=80",
-          maxParticipants: 15,
-        },
-        {
-          destination: "סרי לנקה",
-          date: "2025-12-01",
-          price: 4200,
-          description: "חווית גלישה ואוכל מקומי בחופים הדרומיים של סרי לנקה.",
-          image:
-            "https://images.unsplash.com/photo-1516216628259-22240502a50a?auto=format&fit=crop&w=800&q=80",
-          maxParticipants: 12,
-        },
-        {
-          destination: "פורטוגל",
-          date: "2026-03-10",
-          price: 3800,
-          description: "גלישת גלים ארוכים בחוף המערבי של פורטוגל.",
-          image:
-            "https://images.unsplash.com/photo-1528150244723-5e92751f8982?auto=format&fit=crop&w=800&q=80",
-          maxParticipants: 10,
-        },
-      ];
-
-      // 2. נתונים לקורסים
-      const dummyCourses = [
-        {
-          title: "קורס מתחילים",
-          startDate: "2025-06-01",
-          price: 1200,
-          description: "ללמוד את הבסיס: חתירה, עמידה והבנת הים.",
-          image:
-            "https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=800&q=80",
-          maxParticipants: 20,
-        },
-        {
-          title: "קורס מתקדמים",
-          startDate: "2025-07-15",
-          price: 1500,
-          description: "שיפור טכניקה, פניות וקריאת גלים מתקדמת.",
-          image:
-            "https://images.unsplash.com/photo-1415899285072-5264b3017a86?auto=format&fit=crop&w=800&q=80",
-          maxParticipants: 10,
-        },
-      ];
-
-      // 3. נתונים לבלוג
-      const dummyPosts = [
-        {
-          title: "איך לבחור גלשן?",
-          content: "המדריך המלא לבחירת הגלשן הראשון שלך...",
-          image:
-            "https://images.unsplash.com/photo-1455919426861-c00322303254?auto=format&fit=crop&w=800&q=80",
-        },
-        {
-          title: "5 החופים הכי טובים בארץ",
-          content: "סקירה של החופים הטובים ביותר לגלישה בישראל...",
-          image:
-            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
-        },
-      ];
-
-      // שליחה לשרת בלולאה
-      for (const trip of dummyTrips) await api.post("/trips", trip);
-      for (const course of dummyCourses) await api.post("/courses", course);
-      for (const post of dummyPosts) await api.post("/blog", post);
-
-      alert("🎉 הנתונים נטענו בהצלחה! רענן את הדף כדי לראות.");
-      window.location.reload();
-    } catch (err) {
-      console.error(err);
-      alert("הייתה בעיה בטעינת הנתונים (בדוק ב-Console).");
-    }
-  };
+  // לוגיקה לניהול טיולים (הוספה + עריכה)
   // ==========================================
 
-  // --- פונקציות ניהול (אותן פונקציות מקודם) ---
   const fetchAllTrips = async () => {
     try {
       const res = await api.get("/trips");
@@ -183,8 +94,57 @@ function AdminPage() {
       alert("שגיאה בטעינת הטיולים");
     }
   };
+
+  // פתיחת מודל לעריכה (ממלא את הטופס בפרטים קיימים)
+  const openEditTrip = (trip) => {
+    setEditingId(trip._id);
+    setNewTrip({
+      destination: trip.destination,
+      date: trip.date.split("T")[0],
+      price: trip.price,
+      description: trip.description,
+      image: trip.image,
+      maxParticipants: trip.maxParticipants,
+    });
+    setShowTripModal(true);
+  };
+
+  // פתיחת מודל ליצירה חדשה (מאפס את הטופס)
+  const openNewTrip = () => {
+    setEditingId(null);
+    setNewTrip({
+      destination: "",
+      date: "",
+      price: "",
+      description: "",
+      image: "",
+      maxParticipants: 20,
+    });
+    setShowTripModal(true);
+  };
+
+  const handleSaveTrip = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingId) {
+        // === עדכון (PUT) ===
+        const res = await api.put(`/trips/${editingId}`, newTrip);
+        setAllTrips(allTrips.map((t) => (t._id === editingId ? res.data : t)));
+        alert("הטיול עודכן בהצלחה! ✅");
+      } else {
+        // === יצירה (POST) ===
+        const res = await api.post("/trips", newTrip);
+        setAllTrips([...allTrips, res.data]);
+        alert("הטיול נוצר בהצלחה! 🎉");
+      }
+      setShowTripModal(false);
+    } catch (err) {
+      alert("שגיאה: " + err.message);
+    }
+  };
+
   const handleDeleteTrip = async (id) => {
-    if (window.confirm("למחוק?")) {
+    if (window.confirm("האם למחוק את הטיול?")) {
       try {
         await api.delete(`/trips/${id}`);
         setAllTrips(allTrips.filter((t) => t._id !== id));
@@ -193,25 +153,10 @@ function AdminPage() {
       }
     }
   };
-  const handleAddTrip = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await api.post("/trips", newTrip);
-      setAllTrips([...allTrips, res.data]);
-      setShowTripModal(false);
-      setNewTrip({
-        destination: "",
-        date: "",
-        price: "",
-        description: "",
-        image: "",
-        maxParticipants: 20,
-      });
-      alert("נוסף!");
-    } catch (err) {
-      alert("שגיאה: " + err.message);
-    }
-  };
+
+  // ==========================================
+  // לוגיקה לניהול קורסים (הוספה + עריכה)
+  // ==========================================
 
   const fetchAllCourses = async () => {
     try {
@@ -222,8 +167,55 @@ function AdminPage() {
       alert("שגיאה בטעינת הקורסים");
     }
   };
+
+  const openEditCourse = (course) => {
+    setEditingId(course._id);
+    setNewCourse({
+      title: course.title,
+      startDate: course.startDate.split("T")[0],
+      price: course.price,
+      description: course.description,
+      image: course.image,
+      maxParticipants: course.maxParticipants,
+    });
+    setShowCourseModal(true);
+  };
+
+  const openNewCourse = () => {
+    setEditingId(null);
+    setNewCourse({
+      title: "",
+      description: "",
+      price: "",
+      startDate: "",
+      image: "",
+      maxParticipants: 30,
+    });
+    setShowCourseModal(true);
+  };
+
+  const handleSaveCourse = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingId) {
+        const res = await api.put(`/courses/${editingId}`, newCourse);
+        setAllCourses(
+          allCourses.map((c) => (c._id === editingId ? res.data : c))
+        );
+        alert("הקורס עודכן בהצלחה! ✅");
+      } else {
+        const res = await api.post("/courses", newCourse);
+        setAllCourses([...allCourses, res.data]);
+        alert("הקורס נוצר בהצלחה! 🎉");
+      }
+      setShowCourseModal(false);
+    } catch (err) {
+      alert("שגיאה: " + err.message);
+    }
+  };
+
   const handleDeleteCourse = async (id) => {
-    if (window.confirm("למחוק?")) {
+    if (window.confirm("האם למחוק את הקורס?")) {
       try {
         await api.delete(`/courses/${id}`);
         setAllCourses(allCourses.filter((c) => c._id !== id));
@@ -232,26 +224,10 @@ function AdminPage() {
       }
     }
   };
-  const handleAddCourse = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await api.post("/courses", newCourse);
-      setAllCourses([...allCourses, res.data]);
-      setShowCourseModal(false);
-      setNewCourse({
-        title: "",
-        description: "",
-        price: "",
-        startDate: "",
-        image: "",
-        maxParticipants: 30,
-      });
-      alert("נוסף!");
-    } catch (err) {
-      alert("שגיאה: " + err.message);
-    }
-  };
 
+  // ==========================================
+  // ניהול פורום
+  // ==========================================
   const fetchAllPosts = async () => {
     try {
       const res = await api.get("/blog");
@@ -262,7 +238,7 @@ function AdminPage() {
     }
   };
   const handleDeletePost = async (id) => {
-    if (window.confirm("למחוק?")) {
+    if (window.confirm("האם למחוק את הפוסט?")) {
       try {
         await api.delete(`/blog/${id}`);
         setAllPosts(allPosts.filter((p) => p._id !== id));
@@ -283,24 +259,6 @@ function AdminPage() {
     <div className="admin-container">
       <div className="admin-header">
         <h1>🛠️ פאנל ניהול ({isEmployee ? "עובד" : "מנהל"})</h1>
-
-        {/* כפתור זמני לטעינת נתונים - תלחץ עליו פעם אחת ואז תוכל למחוק אותו */}
-        {!isEmployee && (
-          <button
-            onClick={handleSeedData}
-            style={{
-              background: "orange",
-              border: "none",
-              padding: "10px",
-              borderRadius: "5px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              marginTop: "10px",
-            }}
-          >
-            ⚙️ לחץ כאן כדי למלא את האתר בנתונים (פעם אחת)
-          </button>
-        )}
       </div>
 
       <div className="admin-tabs">
@@ -394,14 +352,14 @@ function AdminPage() {
               <div className="management-grid">
                 <div className="manage-card">
                   <h2>🏄‍♂️ ניהול טיולים</h2>
-                  <p>הוספה ומחיקה של טיולים.</p>
+                  <p>הוספה, עריכה ומחיקה של טיולים.</p>
                   <button className="action-btn" onClick={fetchAllTrips}>
                     כניסה
                   </button>
                 </div>
                 <div className="manage-card">
                   <h2>🎓 ניהול קורסים</h2>
-                  <p>הוספה ומחיקה של קורסים.</p>
+                  <p>הוספה, עריכה ומחיקה של קורסים.</p>
                   <button className="action-btn" onClick={fetchAllCourses}>
                     כניסה
                   </button>
@@ -416,7 +374,7 @@ function AdminPage() {
               </div>
             )}
 
-            {/* טבלאות */}
+            {/* טבלת טיולים - עם עריכה */}
             {managementView === "trips" && (
               <div className="table-container">
                 <div className="table-header">
@@ -427,10 +385,7 @@ function AdminPage() {
                     ➡️ חזור
                   </button>
                   <h2>רשימת הטיולים</h2>
-                  <button
-                    className="add-btn"
-                    onClick={() => setShowTripModal(true)}
-                  >
+                  <button className="add-btn" onClick={openNewTrip}>
                     + הוסף טיול
                   </button>
                 </div>
@@ -451,6 +406,13 @@ function AdminPage() {
                         <td>₪{t.price}</td>
                         <td>
                           <button
+                            className="edit-btn-small"
+                            onClick={() => openEditTrip(t)}
+                            style={{ marginLeft: "10px", cursor: "pointer" }}
+                          >
+                            ✏️ ערוך
+                          </button>
+                          <button
                             className="delete-btn-small"
                             onClick={() => handleDeleteTrip(t._id)}
                           >
@@ -464,6 +426,7 @@ function AdminPage() {
               </div>
             )}
 
+            {/* טבלת קורסים - עם עריכה */}
             {managementView === "courses" && (
               <div className="table-container">
                 <div className="table-header">
@@ -474,10 +437,7 @@ function AdminPage() {
                     ➡️ חזור
                   </button>
                   <h2>רשימת הקורסים</h2>
-                  <button
-                    className="add-btn"
-                    onClick={() => setShowCourseModal(true)}
-                  >
+                  <button className="add-btn" onClick={openNewCourse}>
                     + הוסף קורס
                   </button>
                 </div>
@@ -498,6 +458,13 @@ function AdminPage() {
                         <td>₪{c.price}</td>
                         <td>
                           <button
+                            className="edit-btn-small"
+                            onClick={() => openEditCourse(c)}
+                            style={{ marginLeft: "10px", cursor: "pointer" }}
+                          >
+                            ✏️ ערוך
+                          </button>
+                          <button
                             className="delete-btn-small"
                             onClick={() => handleDeleteCourse(c._id)}
                           >
@@ -511,6 +478,7 @@ function AdminPage() {
               </div>
             )}
 
+            {/* טבלת בלוג */}
             {managementView === "blog" && (
               <div className="table-container">
                 <div className="table-header">
@@ -553,12 +521,12 @@ function AdminPage() {
         )}
       </div>
 
-      {/* מודלים */}
+      {/* מודל טיול (משותף ליצירה ועריכה) */}
       {showTripModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>הוספת טיול</h3>
-            <form onSubmit={handleAddTrip}>
+            <h3>{editingId ? "✏️ עריכת טיול" : "✈️ הוספת טיול חדש"}</h3>
+            <form onSubmit={handleSaveTrip}>
               <input
                 placeholder="יעד"
                 required
@@ -608,7 +576,7 @@ function AdminPage() {
               />
               <div className="modal-buttons">
                 <button type="submit" className="save-btn">
-                  שמור
+                  {editingId ? "עדכן" : "שמור"}
                 </button>
                 <button
                   type="button"
@@ -623,11 +591,12 @@ function AdminPage() {
         </div>
       )}
 
+      {/* מודל קורס (משותף ליצירה ועריכה) */}
       {showCourseModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>הוספת קורס</h3>
-            <form onSubmit={handleAddCourse}>
+            <h3>{editingId ? "✏️ עריכת קורס" : "🎓 הוספת קורס חדש"}</h3>
+            <form onSubmit={handleSaveCourse}>
               <input
                 placeholder="שם הקורס"
                 required
@@ -680,7 +649,7 @@ function AdminPage() {
               />
               <div className="modal-buttons">
                 <button type="submit" className="save-btn">
-                  שמור
+                  {editingId ? "עדכן" : "שמור"}
                 </button>
                 <button
                   type="button"

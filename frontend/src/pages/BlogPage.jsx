@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import api from "../api"; // חיבור לשרת
+import api from "../api";
 import "./BlogPage.css";
 
 function BlogPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. שליפת פרטי המשתמש מה-Local Storage
+  // 1. שליפת פרטי המשתמש
   const userString = localStorage.getItem("user");
   const user = userString ? JSON.parse(userString) : null;
 
-  // 2. בדיקות הרשאה
-  const isLoggedIn = !!user; // האם מחובר? (בשביל לראות/להגיב בדיונים)
+  // בדיקות הרשאה
+  const isLoggedIn = !!user;
+  const isManager = user && (user.role === "admin" || user.role === "employee");
 
-  const canCreatePost =
-    user && (user.role === "admin" || user.role === "employee");
-
-  // 3. טעינת הפוסטים מהשרת
+  // 2. טעינת הפוסטים מהשרת
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -29,7 +27,6 @@ function BlogPage() {
         setLoading(false);
       }
     };
-
     fetchPosts();
   }, []);
 
@@ -39,7 +36,7 @@ function BlogPage() {
         className="blog-container"
         style={{ textAlign: "center", marginTop: "50px" }}
       >
-        <p>טוען פוסטים...</p>
+        <p>טוען דיונים...</p>
       </div>
     );
   }
@@ -54,12 +51,35 @@ function BlogPage() {
         <p>כאן תמצאו כתבות, טיפים, מדריכים וחוויות מהעולם המופלא של הגלישה</p>
       </div>
 
-      {/* ✅ כפתור יצירת אשכול חדש - מוצג רק למנהלים ועובדים! */}
-      {canCreatePost && (
+      {/* ✅ כפתור יצירת אשכול - פתוח לכל המשתמשים המחוברים! */}
+      {isLoggedIn && (
         <div
           className="discussion-actions"
-          style={{ marginBottom: "20px", textAlign: "right" }}
+          style={{
+            marginBottom: "20px",
+            textAlign: "right",
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            gap: "10px",
+          }}
         >
+          {/* הערה למשתמשים רגילים */}
+          {!isManager && (
+            <span
+              style={{
+                fontSize: "0.85rem",
+                color: "#666",
+                background: "#f8f9fa",
+                padding: "5px 10px",
+                borderRadius: "15px",
+                border: "1px solid #eee",
+              }}
+            >
+              ℹ️ פוסטים של גולשים דורשים אישור מנהל לפני הפרסום
+            </span>
+          )}
+
           <Link
             to="/discussion/new"
             className="create-thread-button"
@@ -70,10 +90,10 @@ function BlogPage() {
               borderRadius: "5px",
               textDecoration: "none",
               fontWeight: "bold",
-              display: "inline-block",
+              boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
             }}
           >
-            + יצירת אשכול דיון חדש
+            + פתח דיון חדש
           </Link>
         </div>
       )}
@@ -81,7 +101,7 @@ function BlogPage() {
       <div className="blog-grid">
         {posts.map((post) => (
           <div className="blog-card" key={post._id}>
-            {/* תמונה (אם קיימת) */}
+            {/* תמונה */}
             {post.image ? (
               <img src={post.image} alt={post.title} className="blog-image" />
             ) : (
@@ -105,30 +125,26 @@ function BlogPage() {
                 </span>
               </div>
 
-              <p>
-                {post.content ? post.content.substring(0, 100) + "..." : ""}
-              </p>
+              <p>{post.content ? post.content.substring(0, 80) + "..." : ""}</p>
 
               <div
                 className="card-actions"
                 style={{ marginTop: "auto", display: "flex", gap: "10px" }}
               >
-                {/* 1. קישור לקריאת הפוסט המלא */}
                 <Link to={`/blog/${post._id}`} className="read-more">
                   קרא עוד
                 </Link>
 
-                {/* 2. קישור לדיון - פתוח לכל המשתמשים הרשומים */}
                 {isLoggedIn && (
                   <Link
-                    to={`/blog/discussion/${post._id}`}
+                    to={`/blog/${post._id}`} // מפנה לאותו דף, כי התגובות נמצאות שם עכשיו
                     className="read-more discussion-link"
                     style={{
                       backgroundColor: "#005f86",
                       borderColor: "#005f86",
                     }}
                   >
-                    💬 הצטרף לדיון
+                    💬 תגובות ({post.comments.length})
                   </Link>
                 )}
               </div>
@@ -137,10 +153,18 @@ function BlogPage() {
         ))}
 
         {posts.length === 0 && (
-          <p style={{ textAlign: "center", gridColumn: "1/-1" }}>
-            עדיין אין פוסטים בבלוג. מנהלים יכולים להוסיף פוסטים דרך פאנל הניהול
-            או דרך הכפתור למעלה.
-          </p>
+          <div
+            style={{
+              gridColumn: "1/-1",
+              textAlign: "center",
+              padding: "40px",
+              background: "#f9f9f9",
+              borderRadius: "10px",
+            }}
+          >
+            <h3>עדיין אין פוסטים כאן 🏖️</h3>
+            <p>היה הראשון לפתוח דיון או לשתף חוויה!</p>
+          </div>
         )}
       </div>
     </div>
