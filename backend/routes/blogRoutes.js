@@ -3,20 +3,14 @@ const router = express.Router();
 const BlogPost = require("../models/BlogPost");
 const { protect } = require("../middleware/authMiddleware");
 
-// ----------------------------------------------------
-// GET - קבלת פוסטים (עם סינון חכם)
-// ----------------------------------------------------
+// GET - קבלת פוסטים
 router.get("/", async (req, res) => {
   try {
-    // אם נשלח בבקשה ?all=true (עבור האדמין), נביא הכל.
-    // אחרת (עבור הגולשים), נביא רק את המאושרים.
     const showAll = req.query.all === "true";
-
     let query = {};
     if (!showAll) {
       query = { isApproved: true };
     }
-
     const posts = await BlogPost.find(query).sort({ createdAt: -1 });
     res.json(posts);
   } catch (err) {
@@ -24,29 +18,21 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ----------------------------------------------------
-// GET - קבלת פוסט בודד לפי ID (כולל תגובות)
-// ----------------------------------------------------
+// GET - פוסט בודד
 router.get("/:id", async (req, res) => {
   try {
     const post = await BlogPost.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
-
-    // אופציונלי: אפשר להוסיף כאן בדיקה אם הפוסט מאושר, אבל לרוב נרצה לתת לכותב לראות את הפוסט שלו גם אם טרם אושר
     res.json(post);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// ----------------------------------------------------
-// POST - יצירת פוסט חדש
-// ----------------------------------------------------
+// POST - יצירת פוסט
 router.post("/", protect, async (req, res) => {
   try {
     const { title, content, image } = req.body;
-
-    // בדיקה: האם המשתמש הוא מצוות האתר? (admin או employee)
     const isStaff = req.user.role === "admin" || req.user.role === "employee";
 
     const newPost = new BlogPost({
@@ -55,7 +41,6 @@ router.post("/", protect, async (req, res) => {
       image,
       authorName: req.user.name,
       authorId: req.user._id,
-      // אם זה איש צוות -> מאושר אוטומטית. אם גולש -> ממתין לאישור.
       isApproved: isStaff ? true : false,
       comments: [],
     });
@@ -68,34 +53,35 @@ router.post("/", protect, async (req, res) => {
 });
 
 // ----------------------------------------------------
-// PUT - אישור פוסט (לאדמין/עובד בלבד) - ✅ חדש!
+// PUT - אישור פוסט (התיקון החזק) 💪
 // ----------------------------------------------------
 router.put("/:id/approve", protect, async (req, res) => {
   try {
-    // רק לצוות מותר לאשר
     if (req.user.role !== "admin" && req.user.role !== "employee") {
       return res.status(401).json({ message: "Not authorized" });
     }
 
-    const post = await BlogPost.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    // שימוש ב-findByIdAndUpdate מבטיח שהשדה יתעדכן בבסיס הנתונים
+    const updatedPost = await BlogPost.findByIdAndUpdate(
+      req.params.id,
+      { isApproved: true },
+      { new: true } // מחזיר את התוצאה המעודכנת
+    );
 
-    post.isApproved = true;
-    await post.save();
-    res.json(post);
+    if (!updatedPost)
+      return res.status(404).json({ message: "Post not found" });
+
+    res.json(updatedPost);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// ----------------------------------------------------
-// POST - הוספת תגובה לפוסט - ✅ חדש!
-// ----------------------------------------------------
+// POST - תגובה
 router.post("/:id/comments", protect, async (req, res) => {
   try {
     const { content } = req.body;
     const post = await BlogPost.findById(req.params.id);
-
     if (!post) return res.status(404).json({ message: "Post not found" });
 
     const newComment = {
@@ -107,22 +93,18 @@ router.post("/:id/comments", protect, async (req, res) => {
 
     post.comments.push(newComment);
     await post.save();
-
-    res.status(201).json(post); // מחזיר את הפוסט המעודכן
+    res.status(201).json(post);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// ----------------------------------------------------
-// DELETE - מחיקת תגובה (מודרציה) - ✅ חדש!
-// ----------------------------------------------------
+// DELETE - מחיקת תגובה
 router.delete("/:id/comments/:commentId", protect, async (req, res) => {
   try {
     const post = await BlogPost.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    // מחיקת התגובה מהמערך
     post.comments = post.comments.filter(
       (c) => c._id.toString() !== req.params.commentId
     );
@@ -134,15 +116,12 @@ router.delete("/:id/comments/:commentId", protect, async (req, res) => {
   }
 });
 
-// ----------------------------------------------------
-// DELETE - מחיקת פוסט שלם
-// ----------------------------------------------------
+// DELETE - מחיקת פוסט
 router.delete("/:id", protect, async (req, res) => {
   try {
     const post = await BlogPost.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    // הרשאה: רק אדמין, עובד, או הכותב המקורי יכולים למחוק
     const isAuthorized =
       req.user.role === "admin" ||
       req.user.role === "employee" ||
