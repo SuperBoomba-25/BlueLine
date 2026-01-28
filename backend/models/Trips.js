@@ -12,6 +12,12 @@ const tripSchema = new mongoose.Schema(
       {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         joinedAt: { type: Date, default: Date.now },
+        // ✅ שדה חדש לניהול סטטוס
+        status: {
+          type: String,
+          enum: ["pending", "approved", "rejected"],
+          default: "pending",
+        },
         healthDeclaration: {
           declared: { type: Boolean, default: false },
           swimming: { type: Boolean, default: false },

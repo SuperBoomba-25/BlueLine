@@ -26,7 +26,12 @@ function AdminPage() {
 
   const [allTrips, setAllTrips] = useState([]);
   const [allCourses, setAllCourses] = useState([]);
-  const [allPosts, setAllPosts] = useState([]); // כאן יישמרו הפוסטים
+  const [allPosts, setAllPosts] = useState([]);
+
+  // ✅ משתנה חדש לניהול המשתתפים של פריט שנבחר
+  const [selectedItemForParticipants, setSelectedItemForParticipants] =
+    useState(null);
+  const [participantsType, setParticipantsType] = useState(null); // 'trip' or 'course'
 
   const [loading, setLoading] = useState(true);
 
@@ -57,7 +62,6 @@ function AdminPage() {
   const user = userString ? JSON.parse(userString) : null;
   const isEmployee = user?.role === "employee";
 
-  // --- טעינה ראשונית ---
   useEffect(() => {
     if (isEmployee) {
       setLoading(false);
@@ -81,7 +85,7 @@ function AdminPage() {
     fetchStats();
   }, [isEmployee]);
 
-  // --- פונקציות ניהול טיולים וקורסים ---
+  // --- פונקציות ניהול טיולים ---
   const fetchAllTrips = async () => {
     try {
       const res = await api.get("/trips");
@@ -141,6 +145,7 @@ function AdminPage() {
     }
   };
 
+  // --- פונקציות ניהול קורסים ---
   const fetchAllCourses = async () => {
     try {
       const res = await api.get("/courses");
@@ -202,10 +207,9 @@ function AdminPage() {
     }
   };
 
-  // --- ✅ ניהול פורום (החלק שתוקן) ---
+  // --- פונקציות ניהול פורום ---
   const fetchAllPosts = async () => {
     try {
-      // כאן היה החסר: הוספנו ?all=true כדי להביא גם פוסטים לא מאושרים
       const res = await api.get("/blog?all=true");
       setAllPosts(res.data);
       setManagementView("blog");
@@ -213,18 +217,15 @@ function AdminPage() {
       alert("שגיאה בטעינת הפוסטים");
     }
   };
-
   const handleApprovePost = async (id) => {
     try {
       const res = await api.put(`/blog/${id}/approve`);
-      // עדכון הטבלה המקומית
       setAllPosts(allPosts.map((p) => (p._id === id ? res.data : p)));
       alert("הפוסט אושר בהצלחה! ✅");
     } catch (err) {
       alert("שגיאה באישור הפוסט");
     }
   };
-
   const handleDeletePost = async (id) => {
     if (window.confirm("האם למחוק את הפוסט?")) {
       try {
@@ -233,6 +234,40 @@ function AdminPage() {
       } catch (err) {
         alert("שגיאה במחיקה");
       }
+    }
+  };
+
+  // --- ✅ פונקציות חדשות לניהול משתתפים (טיולים וקורסים) ---
+  const openParticipants = (item, type) => {
+    setSelectedItemForParticipants(item);
+    setParticipantsType(type);
+    setManagementView("participants");
+  };
+
+  const handleParticipantStatus = async (userId, newStatus) => {
+    try {
+      const endpoint = participantsType === "trip" ? "trips" : "courses";
+      const res = await api.put(
+        `/${endpoint}/${selectedItemForParticipants._id}/participants/${userId}`,
+        { status: newStatus }
+      );
+
+      // עדכון הסטייט המקומי עם המידע החדש מהשרת
+      setSelectedItemForParticipants(res.data);
+
+      // עדכון גם ברשימה הראשית
+      if (participantsType === "trip") {
+        setAllTrips(
+          allTrips.map((t) => (t._id === res.data._id ? res.data : t))
+        );
+      } else {
+        setAllCourses(
+          allCourses.map((c) => (c._id === res.data._id ? res.data : c))
+        );
+      }
+      alert(`המשתתף ${newStatus === "approved" ? "אושר" : "נדחה"} בהצלחה!`);
+    } catch (err) {
+      alert("שגיאה בעדכון הסטטוס: " + err.message);
     }
   };
 
@@ -331,7 +366,6 @@ function AdminPage() {
                 </div>
                 <div className="manage-card">
                   <h2>💬 ניהול פורום</h2>
-                  <p>אישור ומחיקת פוסטים</p>
                   <button className="action-btn" onClick={fetchAllPosts}>
                     כניסה
                   </button>
@@ -339,7 +373,7 @@ function AdminPage() {
               </div>
             )}
 
-            {/* טבלאות טיולים וקורסים */}
+            {/* טבלת טיולים - הוספתי כפתור ניהול משתתפים */}
             {managementView === "trips" && (
               <div className="table-container">
                 <div className="table-header">
@@ -382,6 +416,20 @@ function AdminPage() {
                           >
                             🗑️
                           </button>
+                          <button
+                            style={{
+                              backgroundColor: "#17a2b8",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "5px",
+                              padding: "5px",
+                              marginLeft: "5px",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => openParticipants(t, "trip")}
+                          >
+                            👥 משתתפים
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -389,6 +437,8 @@ function AdminPage() {
                 </table>
               </div>
             )}
+
+            {/* טבלת קורסים - הוספתי כפתור ניהול משתתפים */}
             {managementView === "courses" && (
               <div className="table-container">
                 <div className="table-header">
@@ -431,6 +481,20 @@ function AdminPage() {
                           >
                             🗑️
                           </button>
+                          <button
+                            style={{
+                              backgroundColor: "#17a2b8",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "5px",
+                              padding: "5px",
+                              marginLeft: "5px",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => openParticipants(c, "course")}
+                          >
+                            👥 משתתפים
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -439,7 +503,133 @@ function AdminPage() {
               </div>
             )}
 
-            {/* ✅ טבלת הפורום המתוקנת ✅ */}
+            {/* ✅ מסך ניהול משתתפים חדש ✅ */}
+            {managementView === "participants" &&
+              selectedItemForParticipants && (
+                <div className="table-container">
+                  <div className="table-header">
+                    <button
+                      className="back-btn"
+                      onClick={() =>
+                        setManagementView(
+                          participantsType === "trip" ? "trips" : "courses"
+                        )
+                      }
+                    >
+                      ➡️ חזור לרשימה
+                    </button>
+                    <h2>
+                      משתתפים ב:{" "}
+                      {selectedItemForParticipants.destination ||
+                        selectedItemForParticipants.title}
+                    </h2>
+                  </div>
+                  {selectedItemForParticipants.participants &&
+                  selectedItemForParticipants.participants.length > 0 ? (
+                    <table className="management-table">
+                      <thead>
+                        <tr>
+                          <th>שם</th>
+                          <th>אימייל</th>
+                          <th>תאריך הרשמה</th>
+                          <th>הצהרת בריאות</th>
+                          <th>סטטוס</th>
+                          <th>פעולות</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedItemForParticipants.participants.map((p) => (
+                          <tr key={p._id}>
+                            <td>{p.userId?.name || "לא זמין"}</td>
+                            <td>{p.userId?.email || "לא זמין"}</td>
+                            <td>
+                              {new Date(
+                                p.joinedAt || p.enrolledAt
+                              ).toLocaleDateString()}
+                            </td>
+                            <td>
+                              {p.healthDeclaration?.declared ? "✅" : "❌"}
+                            </td>
+                            <td>
+                              {p.status === "approved" ? (
+                                <span
+                                  style={{ color: "green", fontWeight: "bold" }}
+                                >
+                                  מאושר ✅
+                                </span>
+                              ) : p.status === "rejected" ? (
+                                <span
+                                  style={{ color: "red", fontWeight: "bold" }}
+                                >
+                                  נדחה ❌
+                                </span>
+                              ) : (
+                                <span
+                                  style={{
+                                    color: "orange",
+                                    fontWeight: "bold",
+                                  }}
+                                >
+                                  ממתין ⏳
+                                </span>
+                              )}
+                            </td>
+                            <td>
+                              {p.status === "pending" && (
+                                <>
+                                  <button
+                                    onClick={() =>
+                                      handleParticipantStatus(
+                                        p.userId._id,
+                                        "approved"
+                                      )
+                                    }
+                                    style={{
+                                      backgroundColor: "#28a745",
+                                      color: "white",
+                                      border: "none",
+                                      padding: "5px",
+                                      borderRadius: "5px",
+                                      marginLeft: "5px",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    אשר
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleParticipantStatus(
+                                        p.userId._id,
+                                        "rejected"
+                                      )
+                                    }
+                                    style={{
+                                      backgroundColor: "#dc3545",
+                                      color: "white",
+                                      border: "none",
+                                      padding: "5px",
+                                      borderRadius: "5px",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    דחה
+                                  </button>
+                                </>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p style={{ textAlign: "center", padding: "20px" }}>
+                      עדיין אין נרשמים.
+                    </p>
+                  )}
+                </div>
+              )}
+
+            {/* טבלת פורום */}
             {managementView === "blog" && (
               <div className="table-container">
                 <div className="table-header">
@@ -451,77 +641,55 @@ function AdminPage() {
                   </button>
                   <h2>ניהול פורום</h2>
                 </div>
-
-                {allPosts.length === 0 ? (
-                  <p style={{ textAlign: "center", padding: "20px" }}>
-                    אין פוסטים להצגה
-                  </p>
-                ) : (
-                  <table className="management-table">
-                    <thead>
-                      <tr>
-                        <th>כותרת</th>
-                        <th>מאת</th>
-                        <th>סטטוס</th> {/* העמודה שהייתה חסרה לך */}
-                        <th>פעולות</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {allPosts.map((p) => (
-                        <tr key={p._id}>
-                          <td>{p.title}</td>
-                          <td>{p.authorName}</td>
-                          <td>
-                            {p.isApproved ? (
-                              <span
-                                style={{ color: "green", fontWeight: "bold" }}
-                              >
-                                פורסם ✅
-                              </span>
-                            ) : (
-                              <span
-                                style={{ color: "orange", fontWeight: "bold" }}
-                              >
-                                ממתין לאישור ⏳
-                              </span>
-                            )}
-                          </td>
-                          <td>
-                            {!p.isApproved && (
-                              <button
-                                onClick={() => handleApprovePost(p._id)}
-                                style={{
-                                  backgroundColor: "#28a745",
-                                  color: "white",
-                                  border: "none",
-                                  padding: "5px 10px",
-                                  borderRadius: "5px",
-                                  cursor: "pointer",
-                                  marginLeft: "10px",
-                                }}
-                              >
-                                ✅ אשר
-                              </button>
-                            )}
+                <table className="management-table">
+                  <thead>
+                    <tr>
+                      <th>כותרת</th>
+                      <th>מאת</th>
+                      <th>סטטוס</th>
+                      <th>פעולות</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allPosts.map((p) => (
+                      <tr key={p._id}>
+                        <td>{p.title}</td>
+                        <td>{p.authorName}</td>
+                        <td>
+                          {p.isApproved ? (
+                            <span style={{ color: "green" }}>פורסם ✅</span>
+                          ) : (
+                            <span style={{ color: "orange" }}>ממתין ⏳</span>
+                          )}
+                        </td>
+                        <td>
+                          {!p.isApproved && (
                             <button
-                              className="delete-btn-small"
-                              onClick={() => handleDeletePost(p._id)}
+                              onClick={() => handleApprovePost(p._id)}
+                              style={{
+                                backgroundColor: "#28a745",
+                                color: "white",
+                                marginLeft: "10px",
+                              }}
                             >
-                              🗑️ מחק
+                              ✅ אשר
                             </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                          )}
+                          <button onClick={() => handleDeletePost(p._id)}>
+                            🗑️ מחק
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </>
         )}
       </div>
 
-      {/* מודלים לטיולים וקורסים... */}
+      {/* מודלים של טיול וקורס (ללא שינוי, השארתי אותם למטה) */}
       {showTripModal && (
         <div className="modal-overlay">
           <div className="modal-content">

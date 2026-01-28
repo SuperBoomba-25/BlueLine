@@ -3,36 +3,38 @@ const router = express.Router();
 const Course = require("../models/Course");
 const { protect } = require("../middleware/authMiddleware");
 
-// GET - סטטיסטיקות
+// GET stats
 router.get("/stats", async (req, res) => {
   try {
     const courses = await Course.find({}, "title participants");
     const stats = courses.map((course) => ({
       name: course.title,
-      count: course.participants ? course.participants.length : 0,
+      count: course.participants
+        ? course.participants.filter((p) => p.status === "approved").length
+        : 0,
     }));
-
     res.json(stats);
   } catch (err) {
-    console.error("Error fetching course stats:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET – כל הקורסים
+// GET all (עם שמות!)
 router.get("/", async (req, res) => {
   try {
-    const courses = await Course.find();
+    const courses = await Course.find().populate(
+      "participants.userId",
+      "name email"
+    );
     res.json(courses);
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// POST – יצירת קורס חדש (חדש!) ✅
+// POST new course
 router.post("/", protect, async (req, res) => {
   try {
-    // יוצר קורס חדש עם הנתונים שהתקבלו
     const newCourse = new Course(req.body);
     const savedCourse = await newCourse.save();
     res.status(201).json(savedCourse);
@@ -41,37 +43,37 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
-// PUT – עריכת קורס (חדש!) ✅
+// PUT update course
 router.put("/:id", protect, async (req, res) => {
   try {
     const updatedCourse = await Course.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true, runValidators: true }
+      { new: true }
     );
-    if (!updatedCourse)
-      return res.status(404).json({ message: "Course not found" });
     res.json(updatedCourse);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// DELETE – מחיקת קורס (חדש!) ✅
+// DELETE course
 router.delete("/:id", protect, async (req, res) => {
   try {
-    const course = await Course.findByIdAndDelete(req.params.id);
-    if (!course) return res.status(404).json({ message: "Course not found" });
-    res.json({ message: "Course deleted successfully" });
+    await Course.findByIdAndDelete(req.params.id);
+    res.json({ message: "Course deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET – קורס לפי ID
+// GET single course
 router.get("/:id", async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await Course.findById(req.params.id).populate(
+      "participants.userId",
+      "name email"
+    );
     if (!course) return res.status(404).json({ message: "Course not found" });
     res.json(course);
   } catch (err) {
@@ -79,47 +81,59 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST – הרשמה לקורס (כולל בריאות ותשלום)
+// Enroll
 router.post("/:id/enroll", protect, async (req, res) => {
   try {
-    const userId = req.user._id || req.user.id;
+    const userId = req.user._id;
     const { healthData, paymentData } = req.body;
-
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ message: "Course not found" });
-
-    if (course.participants.length >= course.maxParticipants) {
-      return res.status(400).json({ message: "הקורס מלא" });
-    }
 
     const isEnrolled = course.participants.some(
       (p) => p.userId.toString() === userId.toString()
     );
-    if (isEnrolled) {
+    if (isEnrolled)
       return res.status(400).json({ message: "אתה כבר רשום לקורס זה" });
-    }
 
-    const newParticipant = {
+    course.participants.push({
       userId: userId,
-      healthDeclaration: {
-        declared: healthData?.declared || false,
-        swimming: healthData?.swimming || false,
-        timestamp: new Date(),
-      },
-      paymentStatus: {
-        paid: true,
-        last4Digits: paymentData?.last4Digits || "0000",
-        date: new Date(),
-      },
-    };
+      status: "pending", // ✅
+      healthDeclaration: { ...healthData, timestamp: new Date() },
+      paymentStatus: { ...paymentData, date: new Date(), paid: true },
+    });
 
-    course.participants.push(newParticipant);
+    await course.save();
+    res.json({
+      message: "בקשת ההרשמה לקורס התקבלה וממתינה לאישור! ⏳",
+      course,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "שגיאה בהרשמה", error: err.message });
+  }
+});
+
+// ✅ נתיב חדש: ניהול סטטוס נרשמים לקורס
+router.put("/:id/participants/:userId", protect, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const course = await Course.findById(req.params.id);
+
+    const participant = course.participants.find(
+      (p) => p.userId.toString() === req.params.userId
+    );
+    if (!participant)
+      return res.status(404).json({ message: "User not found in course" });
+
+    participant.status = status;
     await course.save();
 
-    res.json({ message: "נרשמת בהצלחה!", course });
+    const populatedCourse = await Course.findById(req.params.id).populate(
+      "participants.userId",
+      "name email"
+    );
+    res.json(populatedCourse);
   } catch (err) {
-    console.error("Enrollment Error:", err);
-    res.status(500).json({ message: "שגיאה בהרשמה", error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
