@@ -28,7 +28,7 @@ function AdminPage() {
   const [allCourses, setAllCourses] = useState([]);
   const [allPosts, setAllPosts] = useState([]);
 
-  // ✅ משתנה חדש לניהול המשתתפים של פריט שנבחר
+  // משתנה לניהול המשתתפים של פריט שנבחר
   const [selectedItemForParticipants, setSelectedItemForParticipants] =
     useState(null);
   const [participantsType, setParticipantsType] = useState(null); // 'trip' or 'course'
@@ -40,7 +40,7 @@ function AdminPage() {
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
-  // טפסים
+  // ✅ טפסים - הוספנו את השדות החדשים לטיול
   const [newTrip, setNewTrip] = useState({
     destination: "",
     date: "",
@@ -48,7 +48,10 @@ function AdminPage() {
     description: "",
     image: "",
     maxParticipants: 20,
+    duration: "", // חדש
+    ageRange: "", // חדש
   });
+
   const [newCourse, setNewCourse] = useState({
     title: "",
     description: "",
@@ -109,12 +112,13 @@ function AdminPage() {
     setEditingId(trip._id);
     setNewTrip({
       destination: trip.destination || "",
-      // הגנה למקרה שהתאריך חסר במסד הנתונים
       date: trip.date ? trip.date.split("T")[0] : "",
       price: trip.price || "",
       description: trip.description || "",
       image: trip.image || "",
       maxParticipants: trip.maxParticipants || 20,
+      duration: trip.duration || "", // ✅ שאיבת הנתון מהשרת בעריכה
+      ageRange: trip.ageRange || "", // ✅ שאיבת הנתון מהשרת בעריכה
     });
     setShowTripModal(true);
   };
@@ -127,6 +131,8 @@ function AdminPage() {
       description: "",
       image: "",
       maxParticipants: 20,
+      duration: "", // ✅ איפוס ביצירת חדש
+      ageRange: "", // ✅ איפוס ביצירת חדש
     });
     setShowTripModal(true);
   };
@@ -170,7 +176,6 @@ function AdminPage() {
     setEditingId(course._id);
     setNewCourse({
       title: course.title || "",
-      // הגנה למקרה שהתאריך חסר במסד הנתונים
       startDate: course.startDate ? course.startDate.split("T")[0] : "",
       price: course.price || "",
       description: course.description || "",
@@ -239,7 +244,7 @@ function AdminPage() {
     }
   };
 
-  // --- ✅ פונקציות חדשות לניהול משתתפים (טיולים וקורסים) ---
+  // --- פונקציות ניהול משתתפים ---
   const openParticipants = (item, type) => {
     setSelectedItemForParticipants(item);
     setParticipantsType(type);
@@ -254,10 +259,8 @@ function AdminPage() {
         { status: newStatus }
       );
 
-      // עדכון הסטייט המקומי עם המידע החדש מהשרת
       setSelectedItemForParticipants(res.data);
 
-      // עדכון גם ברשימה הראשית
       if (participantsType === "trip") {
         setAllTrips(
           allTrips.map((t) => (t._id === res.data._id ? res.data : t))
@@ -375,7 +378,7 @@ function AdminPage() {
               </div>
             )}
 
-            {/* טבלת טיולים - הוספתי כפתור ניהול משתתפים */}
+            {/* טבלת טיולים */}
             {managementView === "trips" && (
               <div className="table-container">
                 <div className="table-header">
@@ -444,7 +447,7 @@ function AdminPage() {
               </div>
             )}
 
-            {/* טבלת קורסים - הוספתי כפתור ניהול משתתפים */}
+            {/* טבלת קורסים */}
             {managementView === "courses" && (
               <div className="table-container">
                 <div className="table-header">
@@ -513,7 +516,7 @@ function AdminPage() {
               </div>
             )}
 
-            {/* ✅ מסך ניהול משתתפים חדש ✅ */}
+            {/* מסך ניהול משתתפים */}
             {managementView === "participants" &&
               selectedItemForParticipants && (
                 <div className="table-container">
@@ -730,21 +733,38 @@ function AdminPage() {
                 onChange={(e) =>
                   setNewTrip({ ...newTrip, maxParticipants: e.target.value })
                 }
-                placeholder="משתתפים"
+                placeholder="מקסימום משתתפים"
               />
+
+              {/* ✅ השדות החדשים שהוספנו */}
+              <input
+                value={newTrip.duration}
+                onChange={(e) =>
+                  setNewTrip({ ...newTrip, duration: e.target.value })
+                }
+                placeholder="משך הטיול (לדוגמה: 5 ימים)"
+              />
+              <input
+                value={newTrip.ageRange}
+                onChange={(e) =>
+                  setNewTrip({ ...newTrip, ageRange: e.target.value })
+                }
+                placeholder="גילאים (לדוגמה: 18-45)"
+              />
+
               <input
                 value={newTrip.image}
                 onChange={(e) =>
                   setNewTrip({ ...newTrip, image: e.target.value })
                 }
-                placeholder="תמונה"
+                placeholder="כתובת תמונה (URL)"
               />
               <textarea
                 value={newTrip.description}
                 onChange={(e) =>
                   setNewTrip({ ...newTrip, description: e.target.value })
                 }
-                placeholder="תיאור"
+                placeholder="תיאור הטיול"
               />
               <button type="submit">שמור</button>
               <button type="button" onClick={() => setShowTripModal(false)}>
