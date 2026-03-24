@@ -1,3 +1,5 @@
+/* TripsPage.css */
+
 .trips-container {
   padding: 40px 20px;
   background-color: var(--bg-color, #f5faff);
@@ -5,7 +7,7 @@
   direction: rtl;
 }
 
-/* כותרת ראשית */
+/* --- Hero / כותרת ראשית --- */
 .trips-header {
   text-align: center;
   margin-bottom: 3rem;
@@ -26,12 +28,9 @@
   font-size: 1.1rem;
   color: var(--text-secondary, #444);
   line-height: 1.6;
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto 2rem auto;
 }
 
-/* הודעת מערכת */
+/* --- הודעות מערכת --- */
 .info-box {
   background-color: #e3f2fd;
   color: var(--primary-color, #0077cc);
@@ -43,7 +42,6 @@
   text-align: center;
 }
 
-/* טקסט לטעינה */
 .loading-text {
   text-align: center;
   margin-top: 3rem;
@@ -52,7 +50,7 @@
   font-weight: 500;
 }
 
-/* סידור הגריד */
+/* --- הגריד (Grid) --- */
 .trips-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -60,7 +58,7 @@
   padding-bottom: 2rem;
 }
 
-/* כרטיס טיול - שודרג ל-Flexbox כדי להתאים לקורסים */
+/* --- הכרטיס (Card) --- */
 .trip-card {
   background-color: var(--surface-color, #fff);
   border-radius: 12px;
@@ -77,18 +75,33 @@
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
+/* תמונה */
 .trip-image {
   width: 100%;
-  height: 220px; /* הותאם לגובה התמונה בקורסים */
+  height: 220px;
   object-fit: cover;
   border-bottom: 3px solid var(--secondary-color, #0288d1);
 }
 
+/* פלייסחולדר לתמונה במקרה שחסרה (מתוך ההתאמה הקודמת) */
+.trip-image-placeholder {
+  width: 100%;
+  height: 220px;
+  background-color: #e0f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #0288d1;
+  border-bottom: 3px solid var(--secondary-color, #0288d1);
+}
+
+/* תוכן הכרטיס */
 .trip-info {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* מוודא שהתוכן ממלא את כל המקום ודוחף את הכפתור למטה */
+  flex-grow: 1;
 }
 
 .trip-info h3 {
@@ -99,41 +112,91 @@
   text-align: right;
 }
 
-/* כפתור הרשמה - שודרג לכפתור מלא שנדחף לתחתית */
+/* התאמה של התאריך (מקביל ל-detail-badge) */
+.trip-date {
+  background-color: #f1f5f9;
+  color: var(--text-main, #333);
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex; /* כדי שלא יתפוס שורה שלמה כמו פסקאות רגילות */
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 15px;
+  align-self: flex-start; /* מצמיד לימין */
+}
+
+/* תיאור */
+.trip-description {
+  font-size: 0.95rem;
+  color: var(--text-secondary, #444);
+  line-height: 1.6;
+  margin-bottom: 15px;
+  flex-grow: 1;
+  text-align: right;
+}
+
+/* חלק תחתון (מחיר וכפתור) - בקורסים אין Footer כזה, אבל בטיולים יש את ה-trip-footer אז נסדר אותו פה */
+.trip-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  gap: 15px; /* מרווח בין המחיר לכפתור */
+}
+
+/* מחיר */
+.trip-price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary-color, #0077cc);
+  text-align: right;
+}
+
+/* --- כפתור הרשמה (מקביל ל-enroll-btn) --- */
 .register-btn {
-  background-color: #ff9800; /* צבע כתום כמו בתמונה ששלחת */
+  background-color: #28a745; /* צבע ירוק כמו בקורסים */
   color: white;
   border: none;
   padding: 0.8rem 1.2rem;
   font-size: 1rem;
   font-weight: bold;
   border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
-  width: 100%;
-  margin-top: auto; /* זה הסוד שדוחף אותו לתחתית הכרטיסייה תמיד! */
+  /* width: 100%; - הורדתי כי בטיולים הוא יושב לצד המחיר */
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  flex-grow: 1; /* יגרום לכפתור לתפוס את שאר המקום הפנוי ליד המחיר */
 }
 
 .register-btn:hover {
-  background-color: #e68a00;
+  background-color: #218838;
   transform: translateY(-1px);
 }
 
 .register-btn:disabled {
-  background-color: #cccccc;
+  background: #ccc;
+  box-shadow: none;
   cursor: not-allowed;
   transform: none;
 }
 
-/* התאמה למובייל */
+/* כפתור כשהוא רשום (כדי שהצבע שלו מ-JS יעבוד יפה) */
+.register-btn.registered {
+  color: white;
+  opacity: 1; /* מבטל את המראה המעומעם של כפתור disabled רגיל */
+}
+
+/* --- רספונסיביות --- */
 @media (max-width: 768px) {
   .trips-container h1 {
     font-size: 2rem;
   }
+
   .trips-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;

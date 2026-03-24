@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
 import api from "../api";
-import "./TripsPage.css"; 
-import TripRegistrationModal from "./TripRegistrationModal"; // ✅ הייבוא החדש והחשוב
+import "./TripsPage.css";
+import TripRegistrationModal from "./TripRegistrationModal";
 
 function TripsPage() {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // ניהול המודל (החלון הקופץ)
+
   const [selectedTrip, setSelectedTrip] = useState(null);
 
-  // שליפת פרטי המשתמש המחובר
   const userString = localStorage.getItem("user");
   const user = userString ? JSON.parse(userString) : null;
   const userId = user ? user._id : null;
@@ -29,7 +27,6 @@ function TripsPage() {
     fetchTrips();
   }, []);
 
-  // 1. לחיצה על כפתור "הרשמה" -> רק פותחת את המודל (לא שולחת לשרת)
   const handleEnrollClick = (trip) => {
     if (!user) {
       alert("יש להתחבר כדי להירשם לטיול");
@@ -38,78 +35,110 @@ function TripsPage() {
     setSelectedTrip(trip);
   };
 
-  // 2. אישור סופי מהמודל -> שליחה לשרת עם הנתונים
   const handleConfirmEnrollment = async (data) => {
     if (!selectedTrip) return;
-
     try {
       const res = await api.post(`/trips/${selectedTrip._id}/enroll`, {
         healthData: data.healthData,
         paymentData: data.paymentData,
       });
 
-      alert(res.data.message); // הודעה: "הבקשה התקבלה וממתינה לאישור..."
-
-      // עדכון הטיול ברשימה המקומית (כדי שהכפתור יהפוך ל"ממתין")
-      setTrips(trips.map(t => t._id === selectedTrip._id ? res.data.trip : t));
-      
-      setSelectedTrip(null); // סגירת המודל
-
+      alert(res.data.message);
+      setTrips(
+        trips.map((t) => (t._id === selectedTrip._id ? res.data.trip : t))
+      );
+      setSelectedTrip(null);
     } catch (err) {
       alert("שגיאה בהרשמה: " + (err.response?.data?.message || err.message));
       setSelectedTrip(null);
     }
   };
 
-  if (loading) return <div className="trips-container"><p>טוען טיולים...</p></div>;
+  // ✅ פונקציה חכמה לטיפול בתאריכים שגויים או חסרים
+  const formatDate = (dateString) => {
+    if (!dateString) return "תאריך יפורסם בהמשך ⏳";
+    const date = new Date(dateString);
+    // בודק אם התאריך לא חוקי או שווה ל-1970 (תקלת מערכת נפוצה)
+    if (isNaN(date.getTime()) || date.getFullYear() === 1970) {
+      return "תאריך יפורסם בהמשך ⏳";
+    }
+    return `📅 ${date.toLocaleDateString("he-IL")}`;
+  };
+
+  if (loading)
+    return (
+      <div className="trips-container">
+        <p className="loading-text">טוען טיולי גלישה...</p>
+      </div>
+    );
 
   return (
     <div className="trips-container">
       <div className="trips-header">
         <h1>✈️ טיולי גלישה מסביב לעולם</h1>
-        <p>הצטרפו אלינו לחוויה בלתי נשכחת ביעדים הכי שווים!</p>
+        <p className="trips-intro">
+          הצטרפו אלינו לחוויה בלתי נשכחת ביעדים הכי שווים!
+        </p>
       </div>
 
       <div className="trips-grid">
         {trips.map((trip) => {
-          // --- לוגיקה חכמה לכפתורים ---
-          
-          // בדיקה אם המשתמש רשום (מתמודד גם עם אובייקטים וגם עם מחרוזות)
-          const isUserRegistered = trip.participants.some(p => {
-             const pId = p.userId?._id || p.userId; 
-             return pId === userId;
+          const isUserRegistered = trip.participants?.some((p) => {
+            const pId = p.userId?._id || p.userId;
+            return pId === userId;
           });
 
-          // מציאת הסטטוס אם הוא רשום (approved/pending)
-          const myRegistration = trip.participants.find(p => (p.userId?._id || p.userId) === userId);
+          const myRegistration = trip.participants?.find(
+            (p) => (p.userId?._id || p.userId) === userId
+          );
           const myStatus = myRegistration ? myRegistration.status : null;
-
-          const isFull = trip.participants.length >= trip.maxParticipants;
+          const isFull = trip.participants?.length >= trip.maxParticipants;
 
           return (
             <div key={trip._id} className="trip-card">
-              {trip.image && <img src={trip.image} alt={trip.destination} className="trip-image" />}
-              <div className="trip-content">
-                <h2>{trip.destination}</h2>
-                <p className="trip-date">📅 {new Date(trip.date).toLocaleDateString()}</p>
-                <p className="trip-desc">{trip.description}</p>
+              {trip.image ? (
+                <img
+                  src={trip.image}
+                  alt={trip.destination}
+                  className="trip-image"
+                />
+              ) : (
+                <div className="trip-image-placeholder">🌊 תמונה בקרוב</div>
+              )}
+
+              {/* ✅ הותאם ל-CSS (trip-info) */}
+              <div className="trip-info">
+                <h3>{trip.destination}</h3>
+                <p className="trip-date">{formatDate(trip.date)}</p>
+                <p className="trip-description">{trip.description}</p>
+
                 <div className="trip-footer">
-                  <span className="trip-price">{trip.price} ₪</span>
-                  
+                  <span className="trip-price">₪{trip.price}</span>
+
                   {isUserRegistered ? (
-                    // אם רשום - הצג כפתור לפי הסטטוס (ירוק או כתום)
-                    <button disabled className="enroll-btn registered" style={{
-                        backgroundColor: myStatus === 'approved' ? '#28a745' : '#fd7e14', 
-                        cursor: 'default',
-                        opacity: 1
-                    }}>
-                       {myStatus === 'approved' ? '✅ רשום לטיול' : '⏳ ממתין לאישור'}
+                    <button
+                      disabled
+                      className="register-btn registered"
+                      style={{
+                        backgroundColor:
+                          myStatus === "approved" ? "#28a745" : "#fd7e14",
+                        cursor: "default",
+                      }}
+                    >
+                      {myStatus === "approved"
+                        ? "✅ רשום לטיול"
+                        : "⏳ ממתין לאישור"}
                     </button>
                   ) : isFull ? (
-                    <button disabled className="enroll-btn full">הטיול מלא</button>
+                    <button disabled className="register-btn full">
+                      הטיול מלא
+                    </button>
                   ) : (
-                    // אם לא רשום ויש מקום - כפתור הרשמה רגיל
-                    <button className="enroll-btn" onClick={() => handleEnrollClick(trip)}>
+                    // ✅ הותאם ל-CSS (register-btn)
+                    <button
+                      className="register-btn"
+                      onClick={() => handleEnrollClick(trip)}
+                    >
                       הרשמה לטיול ⬅️
                     </button>
                   )}
@@ -120,7 +149,6 @@ function TripsPage() {
         })}
       </div>
 
-      {/* הרכיב של המודל הקופץ - מוצג רק אם נבחר טיול */}
       {selectedTrip && (
         <TripRegistrationModal
           trip={selectedTrip}
