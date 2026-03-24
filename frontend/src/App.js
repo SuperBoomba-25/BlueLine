@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// ✅ ייבוא של רכיב ההודעות החדש
+import { Toaster } from "react-hot-toast";
 
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -23,6 +25,9 @@ import "./App.css";
 function App() {
   return (
     <Router>
+      {/* ✅ הרכיב הזה יאפשר להודעות לקפוץ למעלה באמצע */}
+      <Toaster position="top-center" reverseOrder={false} />
+
       <div className="app-container">
         {/* התפריט הצדדי הקבוע */}
         <Sidebar />
@@ -65,7 +70,6 @@ function App() {
             />
 
             {/* ✅ נתיב לדף האדמין - מוגן למנהלים ועובדים בלבד! */}
-            {/* הוספנו כאן את adminOnly={true} */}
             <Route
               path="/admin"
               element={
