@@ -58,7 +58,6 @@ function TripsPage() {
   const formatDate = (dateString) => {
     if (!dateString) return "תאריך יפורסם בהמשך ⏳";
     const date = new Date(dateString);
-    // בודק אם התאריך לא חוקי או שווה ל-1970 (תקלת מערכת נפוצה)
     if (isNaN(date.getTime()) || date.getFullYear() === 1970) {
       return "תאריך יפורסם בהמשך ⏳";
     }
@@ -92,7 +91,12 @@ function TripsPage() {
             (p) => (p.userId?._id || p.userId) === userId
           );
           const myStatus = myRegistration ? myRegistration.status : null;
-          const isFull = trip.participants?.length >= trip.maxParticipants;
+
+          // חישוב מקומות בלייב
+          const max = trip.maxParticipants || 0;
+          const current = trip.participants?.length || 0;
+          const spotsLeft = max - current;
+          const isFull = spotsLeft <= 0;
 
           return (
             <div key={trip._id} className="trip-card">
@@ -106,11 +110,29 @@ function TripsPage() {
                 <div className="trip-image-placeholder">🌊 תמונה בקרוב</div>
               )}
 
-              {/* ✅ הותאם ל-CSS (trip-info) */}
               <div className="trip-info">
                 <h3>{trip.destination}</h3>
+
+                {/* 📅 תאריך */}
                 <p className="trip-date">{formatDate(trip.date)}</p>
+
+                {/* 🟢 הנתונים החדשים (משך הטיול וגילאים) כמו בקורסים */}
+                <div className="trip-details-row">
+                  <span className="detail-badge">
+                    ⏱ משך הטיול: {trip.duration || "לא צוין"}
+                  </span>
+                  <span className="detail-badge">
+                    👤 גילאים: {trip.ageRange || "ללא הגבלה"}
+                  </span>
+                </div>
+
+                {/* 📝 תיאור */}
                 <p className="trip-description">{trip.description}</p>
+
+                {/* 🟢 סטטוס מקומות פנויים בלייב */}
+                <div className={`trip-spots ${spotsLeft <= 3 ? "low" : "ok"}`}>
+                  🧍‍♂️ מקומות פנויים: {spotsLeft > 0 ? spotsLeft : "הטיול מלא!"}
+                </div>
 
                 <div className="trip-footer">
                   <span className="trip-price">₪{trip.price}</span>
@@ -134,7 +156,6 @@ function TripsPage() {
                       הטיול מלא
                     </button>
                   ) : (
-                    // ✅ הותאם ל-CSS (register-btn)
                     <button
                       className="register-btn"
                       onClick={() => handleEnrollClick(trip)}

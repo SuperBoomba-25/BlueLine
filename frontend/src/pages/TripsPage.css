@@ -110,7 +110,7 @@
   text-align: right;
 }
 
-/* תאריך - מעוצב כמו ה- badge בקורסים */
+/* תאריך */
 .trip-date {
   background-color: #f1f5f9;
   color: var(--text-main, #333);
@@ -125,6 +125,26 @@
   align-self: flex-start;
 }
 
+/* 🟢 שורת הפרטים החדשה (משך וגילאים) 🟢 */
+.trip-details-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.detail-badge {
+  background-color: #f1f5f9;
+  color: var(--text-main, #333);
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
 /* תיאור */
 .trip-description {
   font-size: 0.95rem;
@@ -135,10 +155,29 @@
   text-align: right;
 }
 
+/* 🟢 סטטוס מקומות פנויים 🟢 */
+.trip-spots {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-align: center;
+  padding: 5px;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+}
+
+.trip-spots.low {
+  color: #e63946;
+}
+
+.trip-spots.ok {
+  color: #2a9d8f;
+}
+
 /* פוטר - מחיר וכפתור הרשמה בשורה אחת כמו בקורסים */
 .trip-footer {
   display: flex;
-  flex-direction: column; /* משנה לעמודה כדי שהמחיר יהיה מעל הכפתור כמו בקורסים */
+  flex-direction: column;
   margin-top: auto;
 }
 
@@ -160,7 +199,7 @@
   font-size: 1rem;
   font-weight: bold;
   border-radius: 6px;
-  width: 100%; /* כפתור ברוחב מלא כמו בקורסים */
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -182,7 +221,7 @@
 }
 
 .register-btn.registered {
-  opacity: 1; /* לביטול המראה העמום אם רשום בהצלחה */
+  opacity: 1;
   cursor: default;
 }
 
