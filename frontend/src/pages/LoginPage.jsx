@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api";
-// ✅ ייבוא הפונקציה שמקפיצה את ההודעה
-import { toast } from "react-toastify";
 
 function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  // הסטייט שמנהל את הופעת ההודעה הירוקה
+  const [showToast, setShowToast] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
@@ -22,46 +22,67 @@ function LoginPage() {
         password: form.password,
       });
 
-      console.log("תשובת שרת בהתחברות:", res.data);
-
-      // 1. שמירת הטוקן
+      // 1. שמירת הטוקן ופרטי המשתמש
       localStorage.setItem("token", res.data.token);
-
-      // 2. חילוץ פרטי המשתמש
       const userData = res.data.user ? res.data.user : res.data;
-
-      // שמירה בלוקל סטורג'
       localStorage.setItem("user", JSON.stringify(userData));
 
-      // ✅ הופעת הודעה מעוצבת מסוג הצלחה!
-      toast.success("התחברת בהצלחה! 👋");
+      // 2. מדליק את ההודעה הירוקה והמודרנית
+      setShowToast(true);
 
-      // 3. הפניה לפי תפקיד ורענון (לאחר השהייה)
+      // משדר לשאר האתר שהמשתמש התחבר (מעדכן את התפריט בלי רענון דפדפן!)
+      window.dispatchEvent(new Event("storage"));
+
+      // 3. מחכה שנייה אחת (כדי שהמשתמש יקרא את ההודעה) ואז מעביר עמוד
       setTimeout(() => {
         if (userData.role === "admin" || userData.role === "employee") {
           navigate("/admin");
         } else {
           navigate("/");
         }
-
-        // רענון כדי שהאתר יתעדכן
-        window.dispatchEvent(new Event("storage"));
-        window.location.reload();
-      }, 1500);
+      }, 1200);
     } catch (err) {
       console.error("Login Error:", err);
       setError(err.response?.data?.message || "שגיאה בהתחברות, נסה שוב.");
-
-      // ✅ הודעת שגיאה קופצת, אם תרצה (הסרתי את ההערה)
-      toast.error(err.response?.data?.message || "שגיאה בהתחברות!");
     }
   };
 
   return (
     <div
       className="auth-container"
-      style={{ maxWidth: "400px", margin: "50px auto", textAlign: "center" }}
+      style={{
+        maxWidth: "400px",
+        margin: "50px auto",
+        textAlign: "center",
+        position: "relative",
+      }}
     >
+      {/* 🟢 ההודעה המעוצבת שתקפוץ ותעבוד בצורה חלקה 🟢 */}
+      {showToast && (
+        <div
+          style={{
+            position: "fixed",
+            top: "30px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "#28a745",
+            color: "white",
+            padding: "15px 30px",
+            borderRadius: "8px",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+            fontSize: "1.1rem",
+            fontWeight: "bold",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            animation: "fadeInDown 0.3s ease-out forwards",
+          }}
+        >
+          <span>✅</span> התחברת בהצלחה!
+        </div>
+      )}
+
       <h2>🔑 התחברות למערכת</h2>
 
       <form
@@ -98,6 +119,8 @@ function LoginPage() {
             color: "white",
             border: "none",
             borderRadius: "5px",
+            fontSize: "16px",
+            fontWeight: "bold",
           }}
         >
           התחבר
@@ -107,6 +130,14 @@ function LoginPage() {
       <p style={{ marginTop: "20px" }}>
         אין לך משתמש? <Link to="/register">הירשם כאן</Link>
       </p>
+
+      {/* תוספת אנימציה קטנה להודעה הקופצת שייראה ממש מקצועי */}
+      <style>{`
+        @keyframes fadeInDown {
+          from { opacity: 0; transform: translate(-50%, -20px); }
+          to { opacity: 1; transform: translate(-50%, 0); }
+        }
+      `}</style>
     </div>
   );
 }

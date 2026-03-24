@@ -1,8 +1,5 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-// ✅ ייבוא רכיב ההודעות החדש והעיצוב שלו
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -26,9 +23,6 @@ import "./App.css";
 function App() {
   return (
     <Router>
-      {/* ✅ הרכיב הזה יאפשר להודעות לקפוץ למעלה באמצע */}
-      <ToastContainer position="top-center" autoClose={1500} />
-
       <div className="app-container">
         {/* התפריט הצדדי הקבוע */}
         <Sidebar />
@@ -70,7 +64,7 @@ function App() {
               }
             />
 
-            {/* ✅ נתיב לדף האדמין - מוגן למנהלים ועובדים בלבד! */}
+            {/* נתיב לדף האדמין - מוגן למנהלים ועובדים בלבד! */}
             <Route
               path="/admin"
               element={
