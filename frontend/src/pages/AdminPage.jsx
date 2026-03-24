@@ -108,12 +108,13 @@ function AdminPage() {
   const openEditTrip = (trip) => {
     setEditingId(trip._id);
     setNewTrip({
-      destination: trip.destination,
-      date: trip.date.split("T")[0],
-      price: trip.price,
-      description: trip.description,
-      image: trip.image,
-      maxParticipants: trip.maxParticipants,
+      destination: trip.destination || "",
+      // הגנה למקרה שהתאריך חסר במסד הנתונים
+      date: trip.date ? trip.date.split("T")[0] : "",
+      price: trip.price || "",
+      description: trip.description || "",
+      image: trip.image || "",
+      maxParticipants: trip.maxParticipants || 20,
     });
     setShowTripModal(true);
   };
@@ -168,12 +169,13 @@ function AdminPage() {
   const openEditCourse = (course) => {
     setEditingId(course._id);
     setNewCourse({
-      title: course.title,
-      startDate: course.startDate.split("T")[0],
-      price: course.price,
-      description: course.description,
-      image: course.image,
-      maxParticipants: course.maxParticipants,
+      title: course.title || "",
+      // הגנה למקרה שהתאריך חסר במסד הנתונים
+      startDate: course.startDate ? course.startDate.split("T")[0] : "",
+      price: course.price || "",
+      description: course.description || "",
+      image: course.image || "",
+      maxParticipants: course.maxParticipants || 30,
     });
     setShowCourseModal(true);
   };
@@ -401,7 +403,11 @@ function AdminPage() {
                     {allTrips.map((t) => (
                       <tr key={t._id}>
                         <td>{t.destination}</td>
-                        <td>{new Date(t.date).toLocaleDateString()}</td>
+                        <td>
+                          {t.date
+                            ? new Date(t.date).toLocaleDateString()
+                            : "לא הוזן תאריך"}
+                        </td>
                         <td>{t.price}</td>
                         <td>
                           <button
@@ -466,7 +472,11 @@ function AdminPage() {
                     {allCourses.map((c) => (
                       <tr key={c._id}>
                         <td>{c.title}</td>
-                        <td>{new Date(c.startDate).toLocaleDateString()}</td>
+                        <td>
+                          {c.startDate
+                            ? new Date(c.startDate).toLocaleDateString()
+                            : "לא הוזן תאריך"}
+                        </td>
                         <td>{c.price}</td>
                         <td>
                           <button
@@ -689,7 +699,7 @@ function AdminPage() {
         )}
       </div>
 
-      {/* מודלים של טיול וקורס (ללא שינוי, השארתי אותם למטה) */}
+      {/* מודלים של טיול וקורס */}
       {showTripModal && (
         <div className="modal-overlay">
           <div className="modal-content">
