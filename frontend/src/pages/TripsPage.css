@@ -1,4 +1,4 @@
-/* TripsPage.css */
+/* TripsPage.css - הותאם במדויק לעיצוב של הקורסים */
 
 .trips-container {
   padding: 40px 20px;
@@ -21,7 +21,6 @@
   color: var(--primary-color, #0077cc);
   margin-bottom: 0.5rem;
   font-weight: 700;
-  text-align: center;
 }
 
 .trips-intro {
@@ -83,16 +82,15 @@
   border-bottom: 3px solid var(--secondary-color, #0288d1);
 }
 
-/* פלייסחולדר לתמונה במקרה שחסרה (מתוך ההתאמה הקודמת) */
 .trip-image-placeholder {
   width: 100%;
   height: 220px;
-  background-color: #e0f2fe;
+  background-color: #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  color: #0288d1;
+  color: var(--text-secondary, #444);
   border-bottom: 3px solid var(--secondary-color, #0288d1);
 }
 
@@ -112,7 +110,7 @@
   text-align: right;
 }
 
-/* התאמה של התאריך (מקביל ל-detail-badge) */
+/* תאריך - מעוצב כמו ה- badge בקורסים */
 .trip-date {
   background-color: #f1f5f9;
   color: var(--text-main, #333);
@@ -120,11 +118,11 @@
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 500;
-  display: inline-flex; /* כדי שלא יתפוס שורה שלמה כמו פסקאות רגילות */
+  display: inline-flex;
   align-items: center;
   gap: 5px;
   margin-bottom: 15px;
-  align-self: flex-start; /* מצמיד לימין */
+  align-self: flex-start;
 }
 
 /* תיאור */
@@ -137,13 +135,11 @@
   text-align: right;
 }
 
-/* חלק תחתון (מחיר וכפתור) - בקורסים אין Footer כזה, אבל בטיולים יש את ה-trip-footer אז נסדר אותו פה */
+/* פוטר - מחיר וכפתור הרשמה בשורה אחת כמו בקורסים */
 .trip-footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column; /* משנה לעמודה כדי שהמחיר יהיה מעל הכפתור כמו בקורסים */
   margin-top: auto;
-  gap: 15px; /* מרווח בין המחיר לכפתור */
 }
 
 /* מחיר */
@@ -151,26 +147,26 @@
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--primary-color, #0077cc);
+  margin-bottom: 10px;
   text-align: right;
 }
 
-/* --- כפתור הרשמה (מקביל ל-enroll-btn) --- */
+/* --- כפתור הרשמה --- */
 .register-btn {
-  background-color: #28a745; /* צבע ירוק כמו בקורסים */
+  background-color: #28a745;
   color: white;
   border: none;
   padding: 0.8rem 1.2rem;
   font-size: 1rem;
   font-weight: bold;
   border-radius: 6px;
-  /* width: 100%; - הורדתי כי בטיולים הוא יושב לצד המחיר */
+  width: 100%; /* כפתור ברוחב מלא כמו בקורסים */
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.2s ease;
-  flex-grow: 1; /* יגרום לכפתור לתפוס את שאר המקום הפנוי ליד המחיר */
 }
 
 .register-btn:hover {
@@ -185,10 +181,9 @@
   transform: none;
 }
 
-/* כפתור כשהוא רשום (כדי שהצבע שלו מ-JS יעבוד יפה) */
 .register-btn.registered {
-  color: white;
-  opacity: 1; /* מבטל את המראה המעומעם של כפתור disabled רגיל */
+  opacity: 1; /* לביטול המראה העמום אם רשום בהצלחה */
+  cursor: default;
 }
 
 /* --- רספונסיביות --- */

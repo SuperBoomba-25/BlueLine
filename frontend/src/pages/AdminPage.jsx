@@ -311,7 +311,7 @@ function AdminPage() {
         {!isEmployee && activeTab === "dashboard" && (
           <div className="charts-grid">
             <div className="chart-card">
-              <h3>נרשמים</h3>
+              <h3>נרשמים לטיולים</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={tripsData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -324,7 +324,7 @@ function AdminPage() {
               </ResponsiveContainer>
             </div>
             <div className="chart-card">
-              <h3>קורסים</h3>
+              <h3>נרשמים לקורסים</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie

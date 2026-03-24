@@ -7,12 +7,17 @@ const tripSchema = new mongoose.Schema(
     date: Date,
     price: { type: Number, required: true },
     image: String,
+
+    // ✅ השדות החדשים שהוספנו (משך הטיול וגילאים)
+    duration: { type: String, default: "לא צוין" },
+    ageRange: { type: String, default: "ללא הגבלה" },
+
     maxParticipants: { type: Number, required: true },
     participants: [
       {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         joinedAt: { type: Date, default: Date.now },
-        // ✅ שדה חדש לניהול סטטוס
+        // שדה לניהול סטטוס
         status: {
           type: String,
           enum: ["pending", "approved", "rejected"],
