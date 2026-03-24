@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api";
-// ✅ ייבוא הפונקציה שמקפיצה את ההודעה המעוצבת
-import toast from "react-hot-toast";
+// ✅ ייבוא הפונקציה שמקפיצה את ההודעה
+import { toast } from "react-toastify";
 
 function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -33,12 +33,10 @@ function LoginPage() {
       // שמירה בלוקל סטורג'
       localStorage.setItem("user", JSON.stringify(userData));
 
-      // ✅ הופעת הודעה מעוצבת ומודרנית במקום alert!
-      toast.success("התחברת בהצלחה! 👋", {
-        duration: 1500, // ההודעה תוצג למשך שניה וחצי
-      });
+      // ✅ הופעת הודעה מעוצבת מסוג הצלחה!
+      toast.success("התחברת בהצלחה! 👋");
 
-      // 3. הפניה לפי תפקיד ורענון (לאחר השהייה כדי שהמשתמש יראה את ההודעה)
+      // 3. הפניה לפי תפקיד ורענון (לאחר השהייה)
       setTimeout(() => {
         if (userData.role === "admin" || userData.role === "employee") {
           navigate("/admin");
@@ -49,12 +47,13 @@ function LoginPage() {
         // רענון כדי שהאתר יתעדכן
         window.dispatchEvent(new Event("storage"));
         window.location.reload();
-      }, 1500); // 1500 מילישניות = שנייה וחצי
+      }, 1500);
     } catch (err) {
       console.error("Login Error:", err);
       setError(err.response?.data?.message || "שגיאה בהתחברות, נסה שוב.");
-      // ✅ אפשר גם לשים הודעת שגיאה מעוצבת פה אם תרצה!
-      // toast.error("שגיאה בהתחברות!");
+
+      // ✅ הודעת שגיאה קופצת, אם תרצה (הסרתי את ההערה)
+      toast.error(err.response?.data?.message || "שגיאה בהתחברות!");
     }
   };
 

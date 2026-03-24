@@ -1,7 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-// ✅ ייבוא של רכיב ההודעות החדש
-import { Toaster } from "react-hot-toast";
+// ✅ ייבוא רכיב ההודעות החדש והעיצוב שלו
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -26,7 +27,7 @@ function App() {
   return (
     <Router>
       {/* ✅ הרכיב הזה יאפשר להודעות לקפוץ למעלה באמצע */}
-      <Toaster position="top-center" reverseOrder={false} />
+      <ToastContainer position="top-center" autoClose={1500} />
 
       <div className="app-container">
         {/* התפריט הצדדי הקבוע */}
