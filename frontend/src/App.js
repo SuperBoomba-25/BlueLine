@@ -16,6 +16,7 @@ import AdminPage from "./pages/AdminPage";
 // ייבוא רכיבים
 import ProtectedRoute from "./components/ProtectedRoute";
 import Sidebar from "./components/Sidebar";
+import SurfCalculator from "./components/SurfCalculator"; // ✅ הייבוא של המחשבון החדש
 
 // עיצוב
 import "./App.css";
@@ -36,6 +37,9 @@ function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/courses" element={<CoursesPage />} />
             <Route path="/trips" element={<TripsPage />} />
+
+            {/* ✅ הנתיב החדש למחשבון הגלשנים (פתוח לכולם) */}
+            <Route path="/calculator" element={<SurfCalculator />} />
 
             {/* בלוג ופוסטים */}
             <Route path="/blog" element={<BlogPage />} />

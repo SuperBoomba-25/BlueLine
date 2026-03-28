@@ -6,7 +6,7 @@ function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // ✅ סטייט חדש שמנהל את הופעת החלון המעוצב של ההתנתקות
+  // סטייט שמנהל את הופעת החלון המעוצב של ההתנתקות
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const navigate = useNavigate();
@@ -19,12 +19,12 @@ function Sidebar() {
 
   const closeMenu = () => setIsOpen(false);
 
-  // ✅ הפונקציה הזו עכשיו רק פותחת את החלון המעוצב שלנו
+  // פונקציה שפותחת את החלון המעוצב
   const handleLogoutClick = () => {
     setShowLogoutModal(true);
   };
 
-  // ✅ הפונקציה הזו מופעלת רק אם המשתמש לחץ "כן" בחלון המעוצב
+  // פונקציה שמופעלת רק אם המשתמש לחץ "כן" בחלון המעוצב
   const confirmLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -76,6 +76,15 @@ function Sidebar() {
             💬 פורום
           </NavLink>
 
+          {/* ✅ הכפתור החדש של מחשבון המידות (פתוח לכולם) */}
+          <NavLink
+            to="/calculator"
+            className={({ isActive }) => (isActive ? "active" : "")}
+            onClick={closeMenu}
+          >
+            📐 מחשבון מידות
+          </NavLink>
+
           {isLoggedIn && (
             <NavLink
               to="/profile"
@@ -98,7 +107,6 @@ function Sidebar() {
 
           <div className="auth-links">
             {isLoggedIn ? (
-              // שינינו את הפונקציה שמופעלת בלחיצה
               <button className="logout-btn-menu" onClick={handleLogoutClick}>
                 🚪 התנתק
               </button>
