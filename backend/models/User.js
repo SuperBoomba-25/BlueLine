@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema({
   isBanned: { type: Boolean, default: false },
   lastLogin: { type: Date },
   createdAt: { type: Date, default: Date.now },
+
+  // ✅ השדות החדשים עבור מערכת "שכחתי סיסמה"
+  resetPasswordToken: String,
+  resetPasswordExpire: Date,
 });
 
 // הצפנת סיסמה לפני שמירה
