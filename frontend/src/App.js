@@ -13,10 +13,14 @@ import BlogDiscussionPage from "./pages/BlogDiscussionPage";
 import CreateThreadPage from "./pages/CreateThreadPage";
 import AdminPage from "./pages/AdminPage";
 
+// ✅ ייבוא דפי שחזור סיסמה
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+
 // ייבוא רכיבים
 import ProtectedRoute from "./components/ProtectedRoute";
 import Sidebar from "./components/Sidebar";
-import SurfCalculator from "./components/SurfCalculator"; // ✅ הייבוא של המחשבון החדש
+import SurfCalculator from "./components/SurfCalculator";
 
 // עיצוב
 import "./App.css";
@@ -38,7 +42,14 @@ function App() {
             <Route path="/courses" element={<CoursesPage />} />
             <Route path="/trips" element={<TripsPage />} />
 
-            {/* ✅ הנתיב החדש למחשבון הגלשנים (פתוח לכולם) */}
+            {/* ✅ נתיבים חדשים לשחזור סיסמה */}
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route
+              path="/reset-password/:token"
+              element={<ResetPasswordPage />}
+            />
+
+            {/* הנתיב למחשבון הגלשנים (פתוח לכולם) */}
             <Route path="/calculator" element={<SurfCalculator />} />
 
             {/* בלוג ופוסטים */}

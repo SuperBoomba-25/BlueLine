@@ -127,9 +127,31 @@ function LoginPage() {
         </button>
       </form>
 
-      <p style={{ marginTop: "20px" }}>
-        אין לך משתמש? <Link to="/register">הירשם כאן</Link>
-      </p>
+      {/* ✅ הוספנו את הקישור לשכחתי סיסמה ✅ */}
+      <div
+        style={{
+          marginTop: "20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+        }}
+      >
+        <p style={{ margin: 0 }}>
+          <Link
+            to="/forgot-password"
+            style={{
+              color: "#0077b6",
+              fontWeight: "bold",
+              textDecoration: "none",
+            }}
+          >
+            שכחת סיסמה?
+          </Link>
+        </p>
+        <p style={{ margin: 0 }}>
+          אין לך משתמש? <Link to="/register">הירשם כאן</Link>
+        </p>
+      </div>
 
       {/* תוספת אנימציה קטנה להודעה הקופצת שייראה ממש מקצועי */}
       <style>{`
