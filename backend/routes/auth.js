@@ -101,16 +101,21 @@ router.post("/forgot-password", async (req, res) => {
     user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
     await user.save();
 
-    // 3. הגדרת nodemailer לשליחת המייל
+    // 3. הגדרת nodemailer לשליחת המייל (מעודכן לשרתי ענן!)
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
-        user: process.env.EMAIL_USER, // האימייל של המערכת שמוגדר ב-.env
-        pass: process.env.EMAIL_PASS, // סיסמת האפליקציה שמוגדרת ב-.env
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false,
       },
     });
 
-    // 4. הלינק שיישלח למשתמש (מפנה לצד הלקוח - React)
+    // 4. הלינק שיישלח למשתמש (אם העליתם כבר את הריאקט לאוויר, תשנה את localhost לכתובת האמיתית שלו)
     const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
 
     const mailOptions = {
