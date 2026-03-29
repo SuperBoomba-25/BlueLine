@@ -7,11 +7,10 @@
 
 /* --- Hero / כותרת ראשית --- */
 .courses-header {
-  text-align: center;
+  text-align: right; /* שונה מ-center לימין */
   margin-bottom: 3rem;
   max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+  /* הוסרו שוליים אוטומטיים כדי שהבלוק ייצמד לימין */
 }
 
 .courses-container h1 {
@@ -19,12 +18,14 @@
   color: var(--primary-color, #0077cc);
   margin-bottom: 0.5rem;
   font-weight: 700;
+  text-align: right; /* הוסף יישור לימין */
 }
 
 .intro {
   font-size: 1.1rem;
   color: var(--text-secondary, #444);
   line-height: 1.6;
+  text-align: right; /* הוסף יישור לימין */
 }
 
 /* --- הודעות מערכת --- */
@@ -130,9 +131,53 @@
   font-size: 0.95rem;
   color: var(--text-secondary, #444);
   line-height: 1.6;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   flex-grow: 1;
   text-align: right;
+}
+
+/* 🟢 התוספת החדשה: קרא עוד / מידע נוסף 🟢 */
+.read-more-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color, #0077cc);
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 15px;
+  text-align: right;
+  text-decoration: underline;
+  align-self: flex-start; /* מצמיד את הכפתור לימין */
+  transition: color 0.3s ease;
+}
+
+.read-more-btn:hover {
+  color: var(--secondary-color, #0288d1);
+}
+
+.more-info-content {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #444);
+  line-height: 1.6;
+  margin-bottom: 15px;
+  text-align: right;
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  border-right: 4px solid var(--secondary-color, #0288d1);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* רשימת "מה כלול" */
@@ -182,7 +227,7 @@
 
 /* --- כפתור הרשמה --- */
 .enroll-btn {
-  background-color: #28a745; /* צבע ירוק כמו בתמונה */
+  background-color: #28a745;
   color: white;
   border: none;
   padding: 0.8rem 1.2rem;
