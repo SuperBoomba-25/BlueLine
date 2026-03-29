@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from "react";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
 } from "recharts";
 import api from "../api";
 import "./AdminPage.css";
@@ -23,6 +18,13 @@ function AdminPage() {
 
   const [tripsData, setTripsData] = useState([]);
   const [coursesData, setCoursesData] = useState([]);
+
+  // סטייט לנתוני הפורום
+  const [blogStats, setBlogStats] = useState({
+    total: 0,
+    pending: 0,
+    approved: 0,
+  });
 
   const [allTrips, setAllTrips] = useState([]);
   const [allCourses, setAllCourses] = useState([]);
@@ -40,7 +42,7 @@ function AdminPage() {
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
-  // ✅ טפסים - הוספנו את השדות החדשים לטיול
+  // טפסים
   const [newTrip, setNewTrip] = useState({
     destination: "",
     date: "",
@@ -48,8 +50,8 @@ function AdminPage() {
     description: "",
     image: "",
     maxParticipants: 20,
-    duration: "", // חדש
-    ageRange: "", // חדש
+    duration: "",
+    ageRange: "",
   });
 
   const [newCourse, setNewCourse] = useState({
@@ -73,12 +75,22 @@ function AdminPage() {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const [tripsRes, coursesRes] = await Promise.all([
+        const [tripsRes, coursesRes, blogRes] = await Promise.all([
           api.get("/trips/stats").catch(() => ({ data: [] })),
           api.get("/courses/stats").catch(() => ({ data: [] })),
+          api.get("/blog?all=true").catch(() => ({ data: [] })),
         ]);
+
         setTripsData(tripsRes.data);
         setCoursesData(coursesRes.data);
+
+        // חישוב נתוני הפורום
+        const posts = blogRes.data;
+        setBlogStats({
+          total: posts.length,
+          pending: posts.filter((p) => !p.isApproved).length,
+          approved: posts.filter((p) => p.isApproved).length,
+        });
       } catch (err) {
         console.error("Error fetching stats:", err);
       } finally {
@@ -117,8 +129,8 @@ function AdminPage() {
       description: trip.description || "",
       image: trip.image || "",
       maxParticipants: trip.maxParticipants || 20,
-      duration: trip.duration || "", // ✅ שאיבת הנתון מהשרת בעריכה
-      ageRange: trip.ageRange || "", // ✅ שאיבת הנתון מהשרת בעריכה
+      duration: trip.duration || "",
+      ageRange: trip.ageRange || "",
     });
     setShowTripModal(true);
   };
@@ -131,8 +143,8 @@ function AdminPage() {
       description: "",
       image: "",
       maxParticipants: 20,
-      duration: "", // ✅ איפוס ביצירת חדש
-      ageRange: "", // ✅ איפוס ביצירת חדש
+      duration: "",
+      ageRange: "",
     });
     setShowTripModal(true);
   };
@@ -312,31 +324,158 @@ function AdminPage() {
       <div className="tab-content">
         {/* דשבורד */}
         {!isEmployee && activeTab === "dashboard" && (
-          <div className="charts-grid">
+          <div
+            className="charts-grid"
+            style={{
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            }}
+          >
+            {/* ריבוע 1: רשימת טיולים עם כמות נרשמים */}
             <div className="chart-card">
-              <h3>נרשמים לטיולים</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={tripsData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="count" fill="#8884d8" />
-                </BarChart>
-              </ResponsiveContainer>
+              <h3>✈️ הרשמות לפי יעדי טיולים</h3>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  marginTop: "15px",
+                }}
+              >
+                {tripsData.length > 0 ? (
+                  tripsData.map((trip, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "12px",
+                        backgroundColor: "#f8f9fa",
+                        border: "1px solid #e9ecef",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <span style={{ fontWeight: "bold", color: "#333" }}>
+                        {trip.name}
+                      </span>
+                      <span
+                        style={{
+                          backgroundColor: "#0077b6",
+                          color: "white",
+                          padding: "5px 12px",
+                          borderRadius: "20px",
+                          fontSize: "0.9rem",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {trip.count} נרשמים
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p>אין נתונים להצגה כרגע.</p>
+                )}
+              </div>
             </div>
+
+            {/* ריבוע 2: נתוני קהילה ופורום */}
             <div className="chart-card">
-              <h3>נרשמים לקורסים</h3>
-              <ResponsiveContainer width="100%" height={300}>
+              <h3>💬 נתוני קהילה ופורום</h3>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "15px",
+                  marginTop: "15px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "15px",
+                    backgroundColor: "#f8f9fa",
+                    borderRadius: "8px",
+                    borderRight: "4px solid #0077b6",
+                  }}
+                >
+                  <span style={{ fontWeight: "bold", color: "#555" }}>
+                    סה"כ דיונים בפורום
+                  </span>
+                  <span
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "1.2rem",
+                      color: "#0077b6",
+                    }}
+                  >
+                    {blogStats.total}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "15px",
+                    backgroundColor: "#e6f4ea",
+                    borderRadius: "8px",
+                    borderRight: "4px solid #28a745",
+                  }}
+                >
+                  <span style={{ fontWeight: "bold", color: "#555" }}>
+                    פוסטים מאושרים באוויר
+                  </span>
+                  <span
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "1.2rem",
+                      color: "#28a745",
+                    }}
+                  >
+                    {blogStats.approved}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "15px",
+                    backgroundColor: "#fff3cd",
+                    borderRadius: "8px",
+                    borderRight: "4px solid #ffc107",
+                  }}
+                >
+                  <span style={{ fontWeight: "bold", color: "#555" }}>
+                    ממתינים לאישור מנהל
+                  </span>
+                  <span
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "1.2rem",
+                      color: "#ffc107",
+                    }}
+                  >
+                    {blogStats.pending}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* ✅ ריבוע 3: פילוח קורסים (מתוקן) */}
+            <div className="chart-card">
+              <h3>🎓 פילוח נרשמים לקורסים</h3>
+              <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie
                     data={coursesData}
                     dataKey="count"
+                    nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={100}
-                    label
+                    outerRadius={90}
+                    label={({ name, value }) => `${name}: ${value}`}
                   >
                     {coursesData.map((entry, index) => (
                       <Cell
@@ -346,6 +485,7 @@ function AdminPage() {
                     ))}
                   </Pie>
                   <Tooltip />
+                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -735,8 +875,6 @@ function AdminPage() {
                 }
                 placeholder="מקסימום משתתפים"
               />
-
-              {/* ✅ השדות החדשים שהוספנו */}
               <input
                 value={newTrip.duration}
                 onChange={(e) =>
@@ -751,7 +889,6 @@ function AdminPage() {
                 }
                 placeholder="גילאים (לדוגמה: 18-45)"
               />
-
               <input
                 value={newTrip.image}
                 onChange={(e) =>
