@@ -4,11 +4,14 @@ const Course = require("../models/Course");
 const { protect } = require("../middleware/authMiddleware");
 
 // GET stats
+// GET stats
 router.get("/stats", async (req, res) => {
   try {
-    const courses = await Course.find({}, "title participants");
+    // 🛠️ התיקון: מבקשים ממונגו גם את title וגם את name
+    const courses = await Course.find({}, "title name participants");
     const stats = courses.map((course) => ({
-      name: course.title,
+      // 🛠️ התיקון: לוקח את title. אם הוא ריק, לוקח את name.
+      name: course.title || course.name || "קורס גלישה",
       count: course.participants
         ? course.participants.filter((p) => p.status === "approved").length
         : 0,
@@ -18,7 +21,6 @@ router.get("/stats", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 // GET all (עם שמות!)
 router.get("/", async (req, res) => {
   try {

@@ -81,8 +81,22 @@ function AdminPage() {
           api.get("/blog?all=true").catch(() => ({ data: [] })),
         ]);
 
-        setTripsData(tripsRes.data);
-        setCoursesData(coursesRes.data);
+        // מדפיס לקונסול כדי שנוכל לראות בדיוק מה השרת שולח לנו!
+        console.log("Courses Data from server:", coursesRes.data);
+
+        // 🛠️ הוספנו את c._id - במונגו הסטטיסטיקות בדרך כלל שומרות שם את השם המקובץ
+        const formattedCourses = coursesRes.data.map((c) => ({
+          ...c,
+          name: c._id || c.title || c.name || c.courseName || "קורס ללא שם",
+        }));
+
+        const formattedTrips = tripsRes.data.map((t) => ({
+          ...t,
+          name: t._id || t.destination || t.name || "טיול ללא שם",
+        }));
+
+        setTripsData(formattedTrips);
+        setCoursesData(formattedCourses);
 
         // חישוב נתוני הפורום
         const posts = blogRes.data;
@@ -99,7 +113,6 @@ function AdminPage() {
     };
     fetchStats();
   }, [isEmployee]);
-
   // --- פונקציות ניהול טיולים ---
   const fetchAllTrips = async () => {
     try {
